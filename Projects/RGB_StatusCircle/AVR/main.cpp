@@ -5,6 +5,8 @@
 #include <util/delay.h>
 #include <math.h>
 
+#include "Job.h"
+
 #define DATA_PIN PD3
 #define TICK_PIN PD4
 
@@ -19,6 +21,20 @@ struct {
 	uint8_t green	= 0;
 	uint8_t blue 	= 0;
 } barData;
+
+enum acceptedCommands : uint8_t {
+	SET_BAR 			= 0,
+	SET_BAR_COLOR 	= 1,
+	SET_CUSTOM_DATA = 2,
+};
+
+class RecData : public TWI::Job {
+public:
+	RecData();
+
+	bool slavePrepare();
+	void slaveEnd();
+};
 
 uint8_t nextPORTC = 0;
 ISR(TIMER0_OVF_vect) {
@@ -83,6 +99,34 @@ void setBar(int8_t startN, int8_t endN, float percent, int16_t r, int16_t g, int
 	}
 }
 
+RecData::RecData() {}
+bool RecData::slavePrepare() {
+	if(TWI::targetReg == acceptedCommands::SET_BAR) {
+		TWI::dataLength = 1;
+		TWI::dataPacket = (uint8_t *)&barData;
+		return true;
+	}
+	if(TWI::targetReg == acceptedCommands::SET_BAR_COLOR) {
+		TWI::dataLength = 3;
+		TWI::dataPacket = ((uint8_t *)&barData) +1;
+		return true;
+	}
+
+	if(TWI::targetReg == acceptedCommands::SET_CUSTOM_DATA) {
+		TWI::dataLength = ARRAY_LEN;
+		TWI::dataPacket = brightnesses;
+		return true;
+	}
+
+}
+void RecData::slaveEnd() {
+	if(TWI::targetReg == acceptedCommands::SET_BAR ||
+		TWI::targetReg == acceptedCommands::SET_BAR_COLOR)
+		setBar(0, 7, ((float)barData.length)/255.0, barData.red, barData.green, barData.blue);
+}
+
+RecData testThing = RecData();
+
 int main() {
 
 	DDRC 		|= (0b1111);
@@ -96,23 +140,22 @@ int main() {
 
 	TIMSK0 |= (1<< TOIE0);
 
+	TWI::init();
+	TWI::setAddr(0x01);
+
 	for(uint8_t i = 0; i<ARRAY_LEN; i++)
 		brightnesses[i] = 0;
 
-	SPCR = (1<< SPE);
-
 	sei();
 
-	uint8_t writeI = 0;
-	while(1) {
-		// Reset write pointer if the Slave Select goes low
-		if((PINB & (1<< PB2)) != 0)
-			writeI = 0;
 
-		if((SPSR & (1<< SPIF)) != 0) {
-			brightnesses[writeI++] = SPDR;
-			SPSR |= (1<< SPIF);
-		}
+	_delay_ms(3000);
+
+	float i = 0;
+	uint8_t formerJ = 5;
+	while(1) {
+		if((TWCR & (1<< TWINT)) != 0)
+			TWI::updateTWI();
 	}
 	return 0;
 }
