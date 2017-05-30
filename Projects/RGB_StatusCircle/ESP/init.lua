@@ -1,7 +1,7 @@
 
 sublist = {};
 
-homeQTT = mqtt.Client("NodeCute", 30);
+homeQTT = mqtt.Client("NodeCute", "Internal", "internal", 30);
 
 connectedServices = {};
 
@@ -17,7 +17,7 @@ function wifiReconnected(wifiTable)
 	print("WiFi connection established!");
 	connectedServices.wifi = true;
 
-	homeQTT:connect("192.168.178.111", 1883, 0, mqttReconnected);
+	homeQTT:connect("192.168.178.111", 1883, 0, mqttReconnected, function(client, reason) print(reason); end);
 end
 
 wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifiReconnected);
@@ -28,10 +28,7 @@ homeQTT:on("offline", function(client) print("MQTT connection lost! :c"); connec
 dofile "MQTTInit.lua"
 dofile "RGBLights.lua"
 
-gpio.mode(4, gpio.OUTPUT);
-gpio.write(4, gpio.HIGH);
-spi.setup(1, spi.MASTER, spi.CPOL_LOW, spi.CPHA_HIGH, 8, 800);
-gpio.mode(8, gpio.INPUT, gpio.PULLUP)
+i2c.setup(0, 1, 2, 400000);
 
 tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 	dofile "PrintDisplay.lua"
