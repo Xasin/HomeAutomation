@@ -1,31 +1,14 @@
 
 ledColors = {};
-bufferColors = {};
-for i = 1,8 do
+for i = 1,8*3 do
 	ledColors[i] = {0, 0, 0};
-end
-for i= 1,3*8 do
-	bufferColors[i] = 0;
 end
 
 function updateLEDs()
-	j = 0;
-	im = 0;
-	for i=1,8 do
-		j = 0;
-		im = i*3;
-		while(j<3) do
-			j = j+1;
-			bufferColors[im + j - 3] = math.floor(((ledColors[i][j])^2) /260);
-		end
-	end
-
-	gpio.write(4, gpio.HIGH);
-	tmr.delay(50);
-	gpio.write(4, gpio.LOW);
-	tmr.delay(50);
-	spi.send(1, bufferColors, 0);
-
+	i2c.start(0);
+	i2c.address(0, 0x01, i2c.TRANSMITTER);
+	i2c.write(0, 2, ledColors);
+	i2c.stop(0);
 end
 
 function tocolor(hexCode)
@@ -40,7 +23,7 @@ function tocolor(hexCode)
 end
 
 
-function HSVtoRGB(angle, outputColor, brightness)
+function setLED_HSV(ledID, angle, brightness)
 	if(brightness == nil) then brightness = 1; end
 
 	while(true) do
@@ -49,14 +32,15 @@ function HSVtoRGB(angle, outputColor, brightness)
 		else break; end
 	end
 
+	ledID = (ledID -1)*3;
 	i = 1 + math.floor(angle/120);
 	if(angle%120 < 60) then
-		outputColor[i] 		= brightness*255;
-		outputColor[i%3 + 1]	= brightness*255 * (angle%60)/60;
-		outputColor[(i + 1)%3 + 1] = 0;
+		ledColors[ledID + i] 					= brightness*255;
+		ledColors[ledID + i%3 + 1]				= brightness*255 * (angle%60)/60;
+		ledColors[ledID + (i + 1)%3 + 1] 	= 0;
 	else
-		outputColor[i%3 + 1] = brightness*255;
-		outputColor[i] 		= brightness*255 * (1 - (angle%60)/60);
-		outputColor[(i + 1)%3 + 1] = 0;
+		ledColors[ledID + i%3 + 1] 			= brightness*255;
+		ledColors[ledID + i] 					= brightness*255 * (1 - (angle%60)/60);
+		ledColors[ledID + (i + 1)%3 + 1] 	= 0;
 	end
 end
