@@ -5,10 +5,15 @@ printHue = 120;
 
 fancyTimer = tmr.create();
 
+ledBrightnesses = {0, 0, 0, 0, 0, 0, 0, 0};
+
+function bWave(phase)
+	phase = (phase*3)%3;
+	if(phase > 1) then return 0; end
+	return 1 - phase;
+end
+
 function updateLights()
-
-	ledBrightnesses = {0, 0, 0, 0, 0, 0, 0, 0};
-
 	if(printProgress >= 99) then
 		tBrightness = 0.5 + 0.5*math.abs(((tmr.now()/1000000)%2 - 1));
 		for i=1,8 do
@@ -16,7 +21,7 @@ function updateLights()
 		end
 	else
 		for i=1,8 do
-			ledBrightnesses[i] = math.max(2 * math.abs(((i/5 - tmr.now()/10000000))%1 *2 - 1) - 1, 0.3);
+			ledBrightnesses[i] = bWave(tmr.now()/10000000 - i/(8*2));
 		end
 	end
 
@@ -24,21 +29,19 @@ function updateLights()
 	leftPwr 	 = 0.08*printProgress;
 	for i=1,8 do
 		if(pwrPerLed < leftPwr) then
-			HSVtoRGB(printHue, ledColors[i], ledBrightnesses[i]);
+			setLED_HSV(i, printHue, (ledBrightnesses[i]*0.7 + 0.3));
 			leftPwr = leftPwr - pwrPerLed;
 		elseif(leftPwr ~= 0) then
-			HSVtoRGB(printHue, ledColors[i], leftPwr * ledBrightnesses[i]);
+			setLED_HSV(i, printHue, leftPwr * (ledBrightnesses[i]*0.7 + 0.3));
 			leftPwr = 0;
 		else
-			for j=1,3 do
-				ledColors[i][j] = ledBrightnesses[i] * 100;
-			end
+			setLED_HSV(i, 0, ledBrightnesses[i]*0.5 + 0.1);
 		end
 	end
 
 	updateLEDs();
 end
-fancyTimer:register(250, tmr.ALARM_AUTO, updateLights);
+fancyTimer:register(100, tmr.ALARM_AUTO, updateLights);
 
 subscribeTo("octoprint/progress/printing", 0, function(tList, data)
 	data = sjson.decode(data);
