@@ -36,6 +36,11 @@ public:
 	void slaveEnd();
 };
 
+uint8_t adjBrightness(uint16_t input) {
+	if(input > 252) return 250;
+	return (input*input) >> 8;
+}
+
 uint8_t nextPORTC = 0;
 ISR(TIMER0_OVF_vect) {
 	PORTD |= (1<< TICK_PIN);
@@ -48,7 +53,7 @@ ISR(TIMER0_OVF_vect) {
 		led = led/2 + 4;
 	else
 		led = led/2;
-	OCR0A = 255 - brightnesses[led*3 + bitpos%3];
+	OCR0A = 255 - adjBrightness(brightnesses[led*3 + bitpos%3]);
 
 	nextPORTC = (~(1<<bitpos/6) & 0b1111);
 
