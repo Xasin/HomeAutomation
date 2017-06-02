@@ -2,11 +2,12 @@
 require 'rubygems'
 require 'sqlite3'
 require 'mqtt'
+require 'json'
 
 require_relative "credentials"
 
 
-xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd],
+$xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd],
 										clean_session: false, client_id: "RB Switching Counter");
 
 class DBManager
@@ -31,10 +32,8 @@ CREATE TABLE SwitchTimes (
 	def registerSwitch(systemName, member, startTime, totalTime)
 		sqlCMD = <<-SQL
 INSERT INTO SwitchTimes
-VALUES ('Xasin', 'Xasin', #{startTime}, #{totalTime});
+VALUES ('#{systemName}', '#{member}', #{startTime}, #{totalTime});
 		SQL
-
-		print sqlCMD + "\n";
 
 		@switchDB.execute(sqlCMD);
 	end
@@ -42,7 +41,7 @@ VALUES ('Xasin', 'Xasin', #{startTime}, #{totalTime});
 	def getSystemMembers(systemName)
 		sysMembers = Array.new;
 
-		@switchDB.execute("SELECT DISTINCT member FROM SwitchTimes WHERE system = #{systemName}") do |row|
+		@switchDB.execute("SELECT DISTINCT member FROM SwitchTimes WHERE system = '#{systemName}'") do |row|
 			sysMembers << row[0];
 		end
 
@@ -51,9 +50,11 @@ VALUES ('Xasin', 'Xasin', #{startTime}, #{totalTime});
 
 	def getSwitchTimes(systemName)
 		switchTimes = Hash.new;
-		@switchDB.execute("SELECT member, sum(switchTime) FROM SwitchTimes WHERE system = #{systemName} GROUP BY member") do |row|
+		@switchDB.execute("SELECT member, sum(switchTime) FROM SwitchTimes WHERE system = '#{systemName}' GROUP BY member") do |row|
 			switchTimes[row[0]] = row[1];
 		end
+
+		return switchTimes;
 	end
 end
 
@@ -79,6 +80,8 @@ class SwitchTimer
 		if @hostInfo[:name] != "none" then
 			@database.registerSwitch(@system, @hostInfo[:name], @hostInfo[:inSince], swTime);
 
+			$xaQTT.publish('personal/switching/Xasin/times', @database.getSwitchTimes("Xasin").to_json, true);
+
 			print("Switching from #{@hostInfo[:name]} (who's been in for #{swTime} seconds, #{@database.getSwitchTimes(@system)[@hostInfo[:name]]} total) to #{name}!\n");
 		else
 			print("Switching to: #{name}\n");
@@ -92,6 +95,6 @@ end
 $switchTime = SwitchTimer.new("Xasin");
 $switchTime.switchTo('none')
 
-xaQTT.get('personal/switching/xasin/who') do |topic, payload|
+$xaQTT.get('personal/switching/Xasin/who') do |topic, payload|
 	$switchTime.switchTo payload
 end
