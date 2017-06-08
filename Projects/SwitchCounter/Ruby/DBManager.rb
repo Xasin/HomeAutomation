@@ -11,34 +11,30 @@ class DBManager
 		unless dbInitialized
 			@switchDB.execute_batch <<-SQL
 
-CREATE TABLE SwitchTimes (
-	member 		UNSIGNED INT,
-	startTime 	UNSIGNED BIGINT,
-	switchTime	UNSIGNED BIGINT
-);
+		CREATE TABLE SwitchTimes (
+			member 		INTEGER,
+			startTime 	UNSIGNED BIGINT,
+			switchTime	UNSIGNED BIGINT
+		);
 
-CREATE TABLE Systems (
-	ID 		UNSIGNED INT AUTO_INCREMENT,
-	name		varchar,
-	PRIMARY KEY(ID)
-);
+		CREATE TABLE Systems (
+			ID 		INTEGER PRIMARY KEY ASC,
+			name		varchar
+		);
 
-CREATE TABLE Members (
-	ID			UNSIGNED INT AUTO_INCREMENT,
-	system	UNSIGNED INT,
-	name		varchar,
-	PRIMARY KEY(ID)
-)
-SQL
+		CREATE TABLE Members (
+			ID			INTEGER PRIMARY KEY ASC,
+			system 	INTEGER,
+			name		varchar
+		);
+		SQL
 		end
-
-		genSyshash();
 	end
 
 	def Systems()
 		systems = Hash.new();
 
-		@switchDB.execute("SELECT name, ID FROM Systems") do |row|
+		@switchDB.execute("SELECT name, ID FROM Systems;") do |row|
 			systems[rows[0]] = rows[1];
 		end
 
@@ -48,43 +44,58 @@ SQL
 	def MembersForSystem(sysName)
 		members = Hash.new();
 
-		@switchDB.execute("SELECT M.name, M.ID FROM Members AS M, Systems AS S WHERE S.ID = M.system AND S.name = '#{sysName}'") do |row|
+		@switchDB.execute("SELECT M.name, M.ID FROM Members AS M, Systems AS S WHERE S.ID = M.system AND S.name = '#{sysName}';") do |row|
 			members[row[0]] = row[1];
  		end
 
 		return members;
 	end
 
-	def genSyshash()
-		@syshash = Hash.new();
-		Systems().each do |sys
+	def memberID(sysName, memberName)
+		mID = @switchDB.get_first_value("SELECT M.ID FROM Members AS M, Systems AS S WHERE S.ID = M.system AND S.name = '#{sysName}' AND M.name = '#{memberName}';");
+		return mID unless mID == nil;
+
+		sysID = @switchDB.get_first_value("SELECT ID FROM Systems WHERE name = '#{sysName}';");
+		if sysID == nil then
+			@switchDB.execute <<-SQL
+			INSERT INTO Systems
+			VALUES (null, '#{sysName}');
+			SQL
+		end
+
+		sysID = @switchDB.get_first_value("SELECT ID FROM Systems WHERE name = '#{sysName}';");
+
+		@switchDB.execute <<-SQL
+		INSERT INTO Members
+		VALUES (null, #{sysID}, '#{memberName}');
+			SQL
+
+		return @switchDB.get_first_value("SELECT M.ID FROM Members AS M, Systems AS S WHERE S.ID = M.system AND S.name = '#{sysName}' AND M.name = '#{memberName}';");
 	end
 
 	def registerSwitch(systemName, member, startTime, totalTime)
+		@switchDB.execute <<-SQL
+		INSERT INTO SwitchTimes
+		VALUES (#{memberID(systemName, member)}, #{startTime}, #{totalTime});
+		SQL
+	end
+
+	def systemSwitchTimesSince(systemName, timestamp)
+		times = Hash.new(0);
+
 		sqlCMD = <<-SQL
-INSERT INTO SwitchTimes
-VALUES ('#{systemName}', '#{member}', #{startTime}, #{totalTime});
+		SELECT M.name, sum(switchTime)
+		FROM SwitchTimes AS T
+		INNER JOIN Members AS M ON M.ID = T.member
+		INNER JOIN Systems AS S ON S.ID = M.system
+		WHERE T.startTime > #{timestamp}
+		GROUP BY M.name
 		SQL
 
-		@switchDB.execute(sqlCMD);
-	end
-
-	def getSystemMembers(systemName)
-		sysMembers = Array.new;
-
-		@switchDB.execute("SELECT DISTINCT member FROM SwitchTimes WHERE system = '#{systemName}'") do |row|
-			sysMembers << row[0];
+		@switchDB.execute(sqlCMD) do |row|
+			times[row[0]] = row[1];
 		end
 
-		return sysMembers;
-	end
-
-	def getSwitchTimes(systemName)
-		switchTimes = Hash.new;
-		@switchDB.execute("SELECT member, sum(switchTime) FROM SwitchTimes WHERE system = '#{systemName}' GROUP BY member") do |row|
-			switchTimes[row[0]] = row[1];
-		end
-
-		return switchTimes;
+		return times;
 	end
 end
