@@ -82,19 +82,36 @@ class DBManager
 
 	def systemSwitchTimesSince(systemName, timestamp)
 		times = Hash.new(0);
+		MembersForSystem(systemName).each do |key, value|
+			times[key] = 0;
+		end
+
+		sysID = @switchDB.get_first_value("SELECT ID FROM Systems WHERE name = '#{systemName}'");
+		return times if(sysID == nil);
 
 		sqlCMD = <<-SQL
 		SELECT M.name, sum(switchTime)
 		FROM SwitchTimes AS T
 		INNER JOIN Members AS M ON M.ID = T.member
-		INNER JOIN Systems AS S ON S.ID = M.system
-		WHERE T.startTime > #{timestamp}
+		WHERE T.startTime >= #{timestamp} AND M.system = #{sysID}
 		GROUP BY M.name
 		SQL
 
 		@switchDB.execute(sqlCMD) do |row|
 			times[row[0]] = row[1];
 		end
+
+		sqlCMD = <<-SQL
+		SELECT M.name, startTime, switchTime
+		FROM SwitchTimes AS T
+		INNER JOIN Members AS M ON M.ID = T.member
+		WHERE M.system = #{sysID}
+		AND startTime < #{timestamp}
+		AND startTime + switchTime > #{timestamp}
+		SQL
+
+		row = @switchDB.get_first_row(sqlCMD)
+		times[row[0]] += row[2] - timestamp + row[1] unless row == nil;
 
 		return times;
 	end
