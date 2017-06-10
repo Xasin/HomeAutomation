@@ -14,10 +14,10 @@ Thread.new do
 		sleep 60;
 
 		packData = Hash.new();
-		packData[:percentage] 	= $switchTime.getPercentagesSince("Xasin", Time.now.to_i - 60*60*24 *3);
-		packData[:total] 			= $switchTime.getTimesSince("Xasin", Time.now.to_i - 60*60*24 *3);
+		packData[:percentage] 	= $switchTime.getPercentagesSince("Xasin", Time.now.to_i - 60*60*24 *7);
+		packData[:total] 			= $switchTime.getTimesSince("Xasin", Time.now.to_i - 60*60*24 *7);
 
-		$xaQTT.publish('personal/switching/Xasin/', packData.to_json);
+		$xaQTT.publish('personal/switching/Xasin/', packData.to_json, retain=true);
 	end
 end
 
