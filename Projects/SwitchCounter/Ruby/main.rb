@@ -5,13 +5,13 @@ require_relative "credentials"
 require_relative "SwitchHandler.rb"
 
 $xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd],
-										clean_session: false, client_id: "RB Switching Counter");
+										clean_session: false);
 
 $switchTime = SwitchHandler.new("SwitchTimes.db");
 
 normalCFG = {
 	updateInterval: 	3*60,
-	measureTimespan:	7*24*60
+	measureTimespan:	7*24*60*60
 }
 
 
