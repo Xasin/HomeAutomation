@@ -73,10 +73,19 @@ class DBManager
 		return @switchDB.get_first_value("SELECT M.ID FROM Members AS M, Systems AS S WHERE S.ID = M.system AND S.name = '#{sysName}' AND M.name = '#{memberName}';");
 	end
 
-	def registerSwitch(systemName, member, startTime, totalTime)
+	def registerSwitch(systemName, member, startTime, duration = 0)
 		@switchDB.execute <<-SQL
 		INSERT INTO SwitchTimes
-		VALUES (#{memberID(systemName, member)}, #{startTime}, #{totalTime});
+		VALUES (#{memberID(systemName, member)}, #{startTime}, #{duration});
+		SQL
+	end
+
+	def updateSwitch(systemName, member, startTime, newTotal)
+		@switchDB.execute <<-SQL
+		UPDATE SwitchTimes
+		SET switchTime = #{newTotal}
+		WHERE member = #{memberID(systemName, member)}
+			AND startTime = #{startTime}
 		SQL
 	end
 

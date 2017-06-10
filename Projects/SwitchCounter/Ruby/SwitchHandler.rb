@@ -8,7 +8,7 @@ class SwitchHandler
 
 	def initialize(dbName)
 		@systemInfos = Hash.new() do |h, k|
-			h[k] = {startTime: 0, member: "none"};
+			h[k] = {startTime: 0, member: "none", lastSave: 0};
 		end
 
 		@database 	= DBManager.new(dbName);
@@ -23,16 +23,28 @@ class SwitchHandler
 		switchLength = Time.now.to_i - sysInfo[:startTime];
 
 		unless sysInfo[:member] == "none"
-			@database.registerSwitch(systemName, sysInfo[:member], sysInfo[:startTime], switchLength);
+			@database.updateSwitch(systemName, sysInfo[:member], sysInfo[:startTime], switchLength);
 
 			print("Time percentages: #{getPercentagesSince(systemName, 0).inspect}\n");
 		end
 
+		@database.registerSwitch(systemName, memberName, Time.now.to_i) unless memberName == "none";
+
 		sysInfo = {
 			startTime: 	Time.now.to_i,
-			member:		memberName
+			member:		memberName,
+			lastSave: 	Time.now.to_i
 		};
 		@systemInfos[systemName] = sysInfo;
+	end
+
+	def autosave()
+		@systemInfos.each do |key, value|
+			unless value[:member] == "none"
+				@database.updateSwitch(key, value[:member], value[:startTime], Time.now.to_i - value[:startTime]);
+				value[:lastSave] = Time.now.to_i;
+			end
+		end
 	end
 
 	def getTimesSince(systemName, timestamp)
@@ -40,7 +52,7 @@ class SwitchHandler
 
 		currentMember = @systemInfos[systemName][:member];
 		unless currentMember == "none" then
-			sysInfo[currentMember] += Time.now.to_i - [@systemInfos[systemName][:startTime], timestamp].max; end
+			sysInfo[currentMember] += Time.now.to_i - [@systemInfos[systemName][:lastSave], timestamp].max; end
 
 		return sysInfo;
 	end

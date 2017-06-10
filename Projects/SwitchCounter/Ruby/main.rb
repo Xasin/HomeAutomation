@@ -9,15 +9,24 @@ $xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mq
 
 $switchTime = SwitchHandler.new("SwitchTimes.db");
 
+normalCFG = {
+	updateInterval: 	3*60,
+	measureTimespan:	7*24*60
+}
+
+
+timingCFG = normalCFG;
 Thread.new do
 	while true
-		sleep 60;
+		sleep timingCFG[:updateInterval]; # Debug time!
+
+		$switchTime.autosave();
 
 		packData = Hash.new();
-		packData[:percentage] 	= $switchTime.getPercentagesSince("Xasin", Time.now.to_i - 60*60*24 *7);
-		packData[:total] 			= $switchTime.getTimesSince("Xasin", Time.now.to_i - 60*60*24 *7);
+		packData[:percentage] 	= $switchTime.getPercentagesSince("Xasin", Time.now.to_i - timingCFG[:measureTimespan]);
+		packData[:total] 			= $switchTime.getTimesSince("Xasin", Time.now.to_i - timingCFG[:measureTimespan]);
 
-		$xaQTT.publish('personal/switching/Xasin/', packData.to_json, retain=true);
+		$xaQTT.publish('personal/switching/Xasin/data', packData.to_json, retain=true);
 	end
 end
 
