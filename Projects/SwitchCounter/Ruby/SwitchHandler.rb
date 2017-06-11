@@ -38,6 +38,10 @@ class SwitchHandler
 		@systemInfos[systemName] = sysInfo;
 	end
 
+	def getSystems()
+		return @database.Systems();
+	end
+
 	def autosave()
 		@systemInfos.each do |key, value|
 			unless value[:member] == "none"

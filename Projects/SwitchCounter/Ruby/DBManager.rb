@@ -35,7 +35,7 @@ class DBManager
 		systems = Hash.new();
 
 		@switchDB.execute("SELECT name, ID FROM Systems;") do |row|
-			systems[rows[0]] = rows[1];
+			systems[row[0]] = row[1];
 		end
 
 		return systems;
