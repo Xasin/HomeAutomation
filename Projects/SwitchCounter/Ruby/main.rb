@@ -13,22 +13,29 @@ normalCFG = {
 	measureTimespan:	7*24*60*60
 }
 
+debugCFG = {
+	updateInterval:	5,
+	measureTimespan: 	120
+}
 
 timingCFG = normalCFG;
+
 Thread.new do
-	while true
-		sleep timingCFG[:updateInterval]; # Debug time!
-
-		$switchTime.autosave();
-
-		packData = Hash.new();
-		packData[:percentage] 	= $switchTime.getPercentagesSince("Xasin", Time.now.to_i - timingCFG[:measureTimespan]);
-		packData[:total] 			= $switchTime.getTimesSince("Xasin", Time.now.to_i - timingCFG[:measureTimespan]);
-
-		$xaQTT.publish('personal/switching/Xasin/data', packData.to_json, retain=true);
+	$xaQTT.get('personal/switching/+/who') do |topic, payload|
+		sysName = topic.match(/^personal\/switching\/(\w+)\/who$/)[1];
+		$switchTime.switchTo(sysName, payload) unless sysName == nil;
 	end
 end
 
-$xaQTT.get('personal/switching/Xasin/who') do |topic, payload|
-	$switchTime.switchTo("Xasin", payload);
+while true
+	sleep timingCFG[:updateInterval];
+
+	$switchTime.autosave();
+
+	$switchTime.getSystems().each do |key, value|
+		packData = Hash.new();
+		packData[:percentage] 	= $switchTime.getPercentagesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
+		packData[:total] 			= $switchTime.getTimesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
+		$xaQTT.publish("personal/switching/#{key}/data", packData.to_json, retain=true);
+	end
 end
