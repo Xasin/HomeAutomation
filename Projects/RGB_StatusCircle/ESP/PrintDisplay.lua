@@ -1,9 +1,5 @@
-
-
 printProgress = 0;
 printHue = 120;
-
-fancyTimer = tmr.create();
 
 ledBrightnesses = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -15,13 +11,19 @@ end
 
 function updateLights()
 	if(printProgress >= 99) then
-		tBrightness = 0.5 + 0.5*math.abs(((tmr.now()/1000000)%2 - 1));
+		tBrightness = 0.5 + 0.5*math.abs(((playTime/1000000)%2 - 1));
 		for i=1,8 do
 			ledBrightnesses[i] = tBrightness;
 		end
+	elseif(printProgress == 0) then
+		for i=1,8*3 do
+			ledColors[i] = 0;
+			printTrack.duration = 0;
+			return;
+		end
 	else
 		for i=1,8 do
-			ledBrightnesses[i] = bWave(tmr.now()/10000000 - i/(8*2));
+			ledBrightnesses[i] = bWave(playTime/10000000 - i/(8*2));
 		end
 	end
 
@@ -39,9 +41,11 @@ function updateLights()
 		end
 	end
 
-	updateLEDs();
+	if(printProgress == 0) then
+	end
 end
-fancyTimer:register(100, tmr.ALARM_AUTO, updateLights);
+printTrack = addLightEffect(true, 10000000, updateLights);
+printTrack.interruptable = true;
 
 subscribeTo("octoprint/progress/printing", 0, function(tList, data)
 	data = sjson.decode(data);
@@ -49,10 +53,5 @@ subscribeTo("octoprint/progress/printing", 0, function(tList, data)
 	print("Received progress: " .. data["progress"] .. "%");
 	printProgress = data["progress"];
 
-	if(printProgress ~= 0) then
-		fancyTimer:start();
-	else
-		fancyTimer:stop();
-		updateLights();
-	end
+	printTrack.duration = 10000000;
 end);

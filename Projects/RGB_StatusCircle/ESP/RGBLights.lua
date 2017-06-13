@@ -1,7 +1,7 @@
 
 ledColors = {};
 for i = 1,8*3 do
-	ledColors[i] = {0, 0, 0};
+	ledColors[i] = 0;
 end
 
 function updateLEDs()

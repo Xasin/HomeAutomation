@@ -30,6 +30,38 @@ dofile "RGBLights.lua"
 
 i2c.setup(0, 1, 2, 400000);
 
+
 tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
+	dofile "LightScheduler.lua"
+
 	dofile "PrintDisplay.lua"
+
+	switchHues = {
+		["Xasin"] 	= 0,
+		["Mesh"]	= 130,
+		["Neira"]	= 234
+	};
+	currentMember 	= "Xasin";
+	oldMember		= "Xasin";
+	switchDispPercent = 0;
+	function displaySwitch()
+		switchDispPercent = 6*playTime/3000000 - 1;
+		for i=1,4 do
+			if(i<switchDispPercent) then
+				setLED_HSV(i, switchHues[currentMember], 1);
+				setLED_HSV(9 - i, switchHues[currentMember], 1);
+			else
+				setLED_HSV(i, switchHues[oldMember], 1);
+				setLED_HSV(9 - i, switchHues[oldMember], 1);
+			end
+		end
+	end
+
+	subscribeTo("personal/switching/Xasin/who", 1, function(tList, payload)
+		if(payload ~= currentMember) then
+			oldMember = currentMember;
+			currentMember = payload;
+			addLightEffect(false, 3000000, displaySwitch);
+		end
+	end)
 end);

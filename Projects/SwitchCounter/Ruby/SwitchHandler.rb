@@ -1,5 +1,4 @@
 
-require 'mqtt'
 require 'json'
 
 require_relative "DBManager.rb"
