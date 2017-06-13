@@ -12,7 +12,7 @@ def MQTT_reconnect()
 
 	while true
 		begin
-			$xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd], client_id: "SwitchNote-#{`hostname`}", clean_session: false);
+			$xaQTT = MQTT::Client.connect(host: $mqtt_credentials[:host], port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd], client_id: "SwitchNote-#{`hostname`}", clean_session: false);
 		rescue
 			$connectAttempts += 1;
 			print "Connecting (#{$connectAttempts})\n"

@@ -1,10 +1,11 @@
 
 require 'rubygems'
+require 'mqtt'
 
 require_relative "credentials"
 require_relative "SwitchHandler.rb"
 
-$xaQTT = MQTT::Client.connect(host: '192.168.178.111', port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd]);
+$xaQTT = MQTT::Client.connect(host: $mqtt_credentials[:host], port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd]);
 
 $switchTime = SwitchHandler.new("SwitchTimes.db");
 
