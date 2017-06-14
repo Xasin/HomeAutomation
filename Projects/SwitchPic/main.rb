@@ -1,8 +1,6 @@
 
 require 'mqtt'
 require 'sinatra'
-set :port, 80
-set :run, true
 
 require_relative "credentials.rb"
 
@@ -49,8 +47,7 @@ Thread.new do
 	end
 end
 
-get "/switchPics/Xasin.png" do
+get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
-	redirect "https://img.shields.io/badge/Tulpa-#{mName}-#{$memberColors[mName]}.png"
-	#send_file "Pics/#{$currentMember["Xasin"]}.jpg";
+	send_file "Pics/#{mName}.jpg";
 end
