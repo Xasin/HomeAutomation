@@ -1,6 +1,8 @@
 
 require 'mqtt'
 require 'sinatra'
+set :port, 80
+set :run, true
 
 require_relative "credentials.rb"
 
