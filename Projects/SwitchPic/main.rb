@@ -51,11 +51,11 @@ Thread.new do
 end
 
 before do
-  cache_control :public, :must_revalidate
+  cache_control :no_cache
 end
 
 get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
 	etag mName
-	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i;
+	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i, :filename => "Xasin.jpg", :type => :jpg, :disposition => :inline;
 end
