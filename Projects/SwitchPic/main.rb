@@ -50,8 +50,12 @@ Thread.new do
 	end
 end
 
+before do
+  cache_control :public, :must_revalidate
+end
+
 get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
-	etag mName
+	etag mName.sha1
 	send_file "Pics/#{mName}.jpg";
 end
