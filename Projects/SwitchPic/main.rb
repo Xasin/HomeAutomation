@@ -27,10 +27,11 @@ def MQTT_reconnect()
 end
 
 $currentMember = Hash.new() do |h, k| $h[k] = "none"; end
-
-def setPic(sysName, memName)
-
-end
+$memberColors = {
+	"Xasin"	=>"red",
+	"Neira"	=>"blue",
+	"Mesh"	=>	"brightgreen",
+}
 
 Thread.new do
 	while true
@@ -46,6 +47,8 @@ Thread.new do
 	end
 end
 
-get "/switchPics/Xasin" do
-	send_file "Pics/#{$currentMember["Xasin"]}.jpg";
+get "/switchPics/Xasin.png" do
+	mName = $currentMember["Xasin"];
+	redirect "https://img.shields.io/badge/Tulpa-#{mName}-#{$memberColors[mName]}.png"
+	#send_file "Pics/#{$currentMember["Xasin"]}.jpg";
 end
