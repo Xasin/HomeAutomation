@@ -52,5 +52,6 @@ end
 
 get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
+	etag mName
 	send_file "Pics/#{mName}.jpg";
 end
