@@ -1,10 +1,11 @@
 
 require 'mqtt'
 require 'sinatra'
-set :port, 80
-set :run, true
 
 require_relative "credentials.rb"
+
+set :port, 80
+set :bind, "192.168.178.111"
 
 $xaQTT = MQTT::Client.connect(host: $mqtt_credentials[:host], port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd]);
 
