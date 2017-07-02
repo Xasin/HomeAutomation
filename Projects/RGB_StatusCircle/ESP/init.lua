@@ -30,7 +30,6 @@ dofile "RGBLights.lua"
 
 i2c.setup(0, 1, 2, 400000);
 
-
 tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 	dofile "LightScheduler.lua"
 
@@ -64,4 +63,12 @@ tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 			addLightEffect(false, 3000000, displaySwitch);
 		end
 	end)
+
+	function displayRainbow()
+		for i=1,8 do
+			setLED_HSV(i, 360/8 * i + 360*tmr.now()/3000000,1);
+		end
+	end
+	addLightEffect(true, 5000000, displayRainbow);
+
 end);

@@ -45,7 +45,7 @@ function LSUpdate()
 		updateLEDs();
 	end
 end
-lightTimer:register(100, tmr.ALARM_AUTO, LSUpdate);
+lightTimer:register(75, tmr.ALARM_AUTO, LSUpdate);
 
 function addLightEffect(shouldRepeat, duration, cbFunction)
 	newTrack = {};
