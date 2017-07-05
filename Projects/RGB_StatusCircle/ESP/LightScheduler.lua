@@ -1,6 +1,4 @@
 
-
-
 trackList 		= {};
 currentTrack 	= nil;
 trackStart		= 0;

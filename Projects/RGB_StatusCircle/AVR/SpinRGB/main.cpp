@@ -7,7 +7,7 @@
 
 #include "Job.h"
 
-#define NUM_LEDS  8
+#define NUM_LEDS  16
 #define ARRAY_LEN (3*NUM_LEDS)
 
 #define DEBUG_BLINK PORTB ^= (1<< PB5);
