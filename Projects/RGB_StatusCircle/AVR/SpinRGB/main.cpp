@@ -19,22 +19,21 @@ uint16_t adjBrightness(uint16_t input) {
 	return (input*input) >> 6;
 }
 
-uint32_t cTime = 0;
-ISR(TIMER0_OVF_vect) {
-	cTime += (1<< 8);
+volatile uint32_t cTime = 0;
+uint32_t timestamp() {
+	return cTime + TCNT1;
 }
-
-uint32_t micros() {
-	return cTime + TCNT0;
+uint32_t icp_timestamp() {
+	return cTime + ICR1;
 }
 
 uint32_t pChangeStart = 0;
 uint32_t lastPhase = 0;
 
-uint32_t rotStart = 0;
-uint32_t rotDur = 0;
-ISR(ANALOG_COMP_vect) {
-	uint32_t cMics = micros();
+volatile uint32_t rotStart = 0;
+volatile uint32_t rotDur = 0;
+ISR(TIMER1_CAPT_vect) {
+	uint32_t cMics = icp_timestamp();
 
 	uint32_t thisPhase = cMics - pChangeStart;
 	pChangeStart = cMics;
@@ -48,13 +47,15 @@ ISR(ANALOG_COMP_vect) {
 }
 
 uint8_t getSegment() {
-	return ((micros() - rotStart) * NUM_LEDS) / rotDur;
+	return ((timestamp() - rotStart) * NUM_LEDS) / rotDur;
 }
 
 uint8_t cColor = 0;
 ISR(TIMER1_OVF_vect) {
 	PORTB |= (0b111 << 2);
 	PORTB &= ~(1 << (cColor+2));
+
+	cTime += 1 << 10;
 
 	if(++cColor == 3)
 		cColor = 0;
@@ -92,19 +93,14 @@ RecData testThing = RecData();
 int main() {
 
 	DDRB |= (0b111 << 2 | 1 << PB1 | 1<< PB5);
-	PORTB |= (0b11 << 3);
+	PORTB |= (1 | 0b11 << 3);
 
 	PORTD |= (1<< PD7);
 
 	TCCR1A |= (1<< WGM10 | 1<< WGM11 | 1<< COM1A0 | 1<< COM1A1);
-	TCCR1B |= (1<< CS10 | 1<<WGM12);
+	TCCR1B |= (1<< CS10 | 1<<WGM12 | 1<< ICES1 | 1<< ICNC1);
 
-	TIMSK1 |= (1<< TOIE1);
-
-	TCCR0B |= (1<< CS01);
-	TIMSK0 |= (1<< TOIE0);
-
-	ACSR |= (1<< ACIE | 1<< ACIS1 | 1<< ACIS0);
+	TIMSK1 |= (1<< TOIE1 | 1<< ICIE1);
 
 	TWI::init();
 	TWI::setAddr(0x01);
