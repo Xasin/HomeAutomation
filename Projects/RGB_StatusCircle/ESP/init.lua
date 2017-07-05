@@ -44,14 +44,14 @@ tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 	oldMember		= "Xasin";
 	switchDispPercent = 0;
 	function displaySwitch()
-		switchDispPercent = 6*playTime/3000000 - 1;
-		for i=1,4 do
+		switchDispPercent = 14*playTime/3000000 - 1;
+		for i=1,8 do
 			if(i<switchDispPercent) then
 				setLED_HSV(i, switchHues[currentMember], 1);
-				setLED_HSV(9 - i, switchHues[currentMember], 1);
+				setLED_HSV(17 - i, switchHues[currentMember], 1);
 			else
 				setLED_HSV(i, switchHues[oldMember], 1);
-				setLED_HSV(9 - i, switchHues[oldMember], 1);
+				setLED_HSV(17 - i, switchHues[oldMember], 1);
 			end
 		end
 	end
@@ -65,8 +65,8 @@ tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 	end)
 
 	function displayRainbow()
-		for i=1,8 do
-			setLED_HSV(i, 360/8 * i + 360*tmr.now()/3000000,1);
+		for i=1,16 do
+			setLED_HSV(i, 360/16 * i + 360*tmr.now()/3000000,1);
 		end
 	end
 	addLightEffect(true, 5000000, displayRainbow);
