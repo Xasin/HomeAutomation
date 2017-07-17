@@ -35,6 +35,7 @@ tmr.create():alarm(5000, tmr.ALARM_SINGLE, function()
 	dofile "LightScheduler.lua"
 
 	dofile "PrintDisplay.lua"
+	dofile "Temp.lua"
 
 	switchHues = {
 		["Xasin"] 	= 0,
