@@ -165,7 +165,7 @@ $w = WeatherInfo.new($privateData["apikey"], "Steinfeld");
 i = 0;
 $w.fiveday_data()["list"].each do |d|
 	if isInteresting(d["dt"].to_i) then
-		speak $w.readable_forecast(d, temperature: Time.today?(d["dt"].to_i));
+		speak $w.readable_forecast(d, temperature: Time.today?(d["dt"].to_i), forceDay: i==0);
 		i += 1;
 	end
 	break if i >= 5;
