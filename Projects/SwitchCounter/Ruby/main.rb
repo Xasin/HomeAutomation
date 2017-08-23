@@ -1,11 +1,12 @@
 
 require 'rubygems'
-require 'mqtt'
+
+require_relative 'MQTTSubscriber.rb'
 
 require_relative "credentials"
 require_relative "SwitchHandler.rb"
 
-$xaQTT = MQTT::Client.connect(host: $mqtt_credentials[:host], port: 1883, username: $mqtt_credentials[:username], password: $mqtt_credentials[:passwd]);
+$xaQTT = MQTTSubs.new(MQTT::Client.new($mqtt_host));
 
 $switchTime = SwitchHandler.new("SwitchTimes.db");
 
@@ -21,11 +22,10 @@ debugCFG = {
 
 timingCFG = normalCFG;
 
-Thread.new do
-	$xaQTT.get('personal/switching/+/who') do |topic, payload|
-		sysName = topic.match(/^personal\/switching\/(\w+)\/who$/)[1];
-		$switchTime.switchTo(sysName, payload) unless sysName == nil;
-	end
+
+$xaQTT.subscribeTo 'personal/switching/+/who' do |topic, payload|
+	sysName = topic[0];
+	$switchTime.switchTo(sysName, payload) unless sysName == nil;
 end
 
 while true
@@ -37,6 +37,6 @@ while true
 		packData = Hash.new();
 		packData[:percentage] 	= $switchTime.getPercentagesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
 		packData[:total] 			= $switchTime.getTimesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
-		$xaQTT.publish("personal/switching/#{key}/data", packData.to_json, retain=true);
+		$xaQTT.publishTo "personal/switching/#{key}/data", packData.to_json, retain: true;
 	end
 end
