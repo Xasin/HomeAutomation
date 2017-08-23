@@ -1,6 +1,6 @@
 
 ledColors = {};
-for i = 1,8*3 do
+for i = 1,16*3 do
 	ledColors[i] = 0;
 end
 
