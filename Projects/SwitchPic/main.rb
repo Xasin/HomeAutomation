@@ -11,13 +11,15 @@ $xaQTT = MQTTSubs.new(MQTT::Client.new($mqtt_host));
 
 $currentMember = Hash.new() do |h, k| $h[k] = "none"; end
 $memberColors = {
-	"Xasin"	=>"red",
-	"Neira"	=>"blue",
+	"Xasin"	=> "red",
+	"Neira"	=> "blue",
 	"Mesh"	=>	"brightgreen",
 }
 
 $xaQTT.subscribeTo "personal/switching/+/who" do |topic, payload|
 	return if payload == "none";
+	puts "Switched to #{payload}"!
+
 	sysName = topic[0];
 	$currentMember[sysName] = payload;
 end
@@ -29,5 +31,5 @@ end
 get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
 	etag mName
-	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i, :filename => "Xasin.jpg", :type => :jpg, :disposition => :inline;
+	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i, :filename => "#{mName}.jpg", :type => :jpg, :disposition => :inline;
 end
