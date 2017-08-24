@@ -14,7 +14,7 @@ class ColorSpeak
 			h[k] = Array.new();
 		end
 
-		mqtt.subscribeTo "Room/TTS/+" do |t, data|
+		@mqtt.subscribeTo "Room/TTS/+" do |t, data|
 			h = JSON.parse(data);
 			return unless h.key? "text";
 
@@ -22,20 +22,20 @@ class ColorSpeak
 			queueWords(t[0], h["text"], c);
 		end
 
-		mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
+		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
 			@defaultC = Color.from_s(data);
 			updateDefaultColor();
 		end
 
-		mqtt.subscribeTo "Room/Light/Set/Brightness" do |t, data|
+		@mqtt.subscribeTo "Room/Light/Set/Brightness" do |t, data|
 			@defaultC.set_brightness(data.to_i);
 			updateDefaultColor();
 		end
 	end
 
 	def updateDefaultColor()
-		mqtt.publishTo "Room/Light/Color", @defaultC.to_s;
-		mqtt.publishTo "Room/Light/Brightness", @defaultC.get_brightness;
+		@mqtt.publishTo "Room/Light/Color", @defaultC.to_s;
+		@mqtt.publishTo "Room/Light/Brightness", @defaultC.get_brightness;
 
 		@led.sendRGB(@defaultC, 3) unless @speaking;
 	end
