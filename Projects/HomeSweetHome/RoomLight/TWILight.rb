@@ -1,5 +1,5 @@
 require 'i2c'
-require_relative '../Libs/ColorUtil.rb'
+require_relative '../Libs/ColorUtils.rb'
 
 class RGB 
 	def initialize()

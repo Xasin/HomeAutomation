@@ -23,8 +23,12 @@ class ColorSpeak
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
-			@defaultC = Color.from_s(data);
-			updateDefaultColor();
+			if(data == "#000000") then
+				@defaultC.set_brightness(0);
+			else
+				@defaultC = Color.from_s(data).set_brightness(@defaultC.get_brightness);
+				updateDefaultColor();
+			end
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Brightness" do |t, data|
@@ -61,14 +65,14 @@ class ColorSpeak
 			while h = v.shift
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
-				@led.sendRGB(h[:c] ? h[:c] : @defaultC, 0.5);
+				@led.sendRGB(h[:c] ? h[:c].set_brightness([@defaultC.get_brightness, 20].max) : @defaultC, 0.5);
 				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
 			@speechQueue.delete k;
 		end
 
-		@led.sendRGB(@defaultC, 3);
+		@led.sendRGB(@defaultC, 0.5);
 		@speaking = false;
 	end
 end
