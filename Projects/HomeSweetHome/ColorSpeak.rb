@@ -27,8 +27,9 @@ class ColorSpeak
 				@defaultC.set_brightness(0);
 			else
 				@defaultC = Color.from_s(data).set_brightness(@defaultC.get_brightness);
-				updateDefaultColor();
 			end
+
+			updateDefaultColor();
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Brightness" do |t, data|
