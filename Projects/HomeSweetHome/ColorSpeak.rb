@@ -18,7 +18,8 @@ class ColorSpeak
 			h = JSON.parse(data);
 			return unless h.key? "text";
 
-			queueWords(t[0], ["text"], Color.fromString(h["color"]));
+			c = h.key?("color") ? Color.from_s(h["color"]) : nil;
+			queueWords(t[0], h["text"], c);
 		end
 	end
 
@@ -43,7 +44,7 @@ class ColorSpeak
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
 				@led.sendRGB(h[:c], 0.5) unless h[:c] == nil;
-				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout | aplay &> /dev/null');
+				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
 			@speechQueue.delete k;
