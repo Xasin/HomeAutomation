@@ -39,14 +39,11 @@ class ColorSpeak
 		until @speechQueue.empty?
 			k = @speechQueue.keys[0];
 			v = @speechQueue[k];
-			puts "Fetching from ID #{k}, #{v}"
-			
 			while h = v.shift
-				puts "Speaking: #{h}";
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
 				@led.sendRGB(h[:c], 0.5) unless h[:c] == nil;
-				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout | aplay');
+				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout | aplay &> /dev/null');
 			end
 
 			@speechQueue.delete k;
