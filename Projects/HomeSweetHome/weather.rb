@@ -1,11 +1,13 @@
 
+require_relative 'Libs/CoreExtensions.rb'
+require_relative 'Libs/ColorUtils.rb'
 require 'json'
 require 'mqtt'
 
 $privateData = JSON.parse(File.read("CodeData.json"));
 $mqtt = MQTT::Client.new($privateData["host"]);
 
-$ttsTopic = "TTS";
+$ttsTopic = "TTS/Weather";
 
 class WeatherInfo
 	attr_reader :city
@@ -126,9 +128,9 @@ class WeatherInfo
 	end
 end
 
-def speak(t)
+def speak(t, color = nil)
 	$mqtt.connect do |c|
-		c.publish $ttsTopic, t;
+		c.publish $ttsTopic, {text: t, color: color.to_s}.to_json;
 	end
 end
 
@@ -142,7 +144,7 @@ $w = WeatherInfo.new($privateData["apikey"], "Steinfeld");
 i = 0;
 $w.fiveday_data()["list"].each do |d|
 	if isInteresting(d["dt"].to_i) then
-		speak $w.readable_forecast(d, temperature: Time.today?(d["dt"].to_i), forceDay: i==0);
+		speak($w.readable_forecast(d, temperature: true, forceDay: i==0), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5));
 		i += 1;
 	end
 	break if i >= 5;
