@@ -7,6 +7,7 @@ class RGB
 	end
 
 	def sendRGB(c, fadeDuration = 0)
+		fadeDuration /= 0.05;
 		@twi.write(0x30, c.rgb.pack("C3"), [fadeDuration].pack("v"));
 	end
 end

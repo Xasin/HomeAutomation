@@ -1,6 +1,6 @@
 
 require 'json'
-require_relative 'Libs/ColorUtil.rb'
+require_relative 'Libs/ColorUtils.rb'
 
 class ColorSpeak
 	def initialize(led, mqtt)
@@ -23,32 +23,35 @@ class ColorSpeak
 	end
 
 	def queueWords(id, t, c)
-		@speechQueue[id] << {t: t, c: c};
+		@speechQueue[id].push({t: t, c: c});
 
 		return if @speaking;
 		@speaking = true;
-		Thread.new() {
-			speakOutQueue;
+		@speechThread = Thread.new() {
+			speakOutQueue();
 		}
+		@speechThread.abort_on_exception = true;
 	end
 
 	def speakOutQueue()
 		@speaking = true;
 
-		@speechQueue.each_pair do |k, v|
-			until v.empty?
-				h = v.drop(1)[0];
+		until @speechQueue.empty?
+			k = @speechQueue.keys[0];
+			v = @speechQueue[k];
+			puts "Fetching from ID #{k}, #{v}"
+			
+			while h = v.shift
+				puts "Speaking: #{h}";
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
 				@led.sendRGB(h[:c], 0.5) unless h[:c] == nil;
 				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout | aplay');
-				@led.sendRGB(@defaultC, 0.5) unless h[:c] == nil;
-				sleep 0.5;
 			end
 
 			@speechQueue.delete k;
 		end
-
+		@led.sendRGB(@defaultC, 0.5);
 		@speaking = false;
 	end
 end
