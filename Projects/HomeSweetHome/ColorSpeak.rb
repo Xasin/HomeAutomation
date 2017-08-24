@@ -7,7 +7,7 @@ class ColorSpeak
 		@led = led;
 		@mqtt = mqtt;
 
-		@defaultC = Color.temperature(7000);
+		@userColor = Color.rgb(0, 0, 0);
 		@speaking = false;
 
 		@speechQueue = Hash.new() do |h, k|
@@ -23,26 +23,34 @@ class ColorSpeak
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
-			if(data == "#000000") then
-				@defaultC.set_brightness(0);
-			else
-				@defaultC = Color.from_s(data).set_brightness(@defaultC.get_brightness);
-			end
-
+			@userColor = Color.from_s(data);
 			updateDefaultColor();
 		end
 
-		@mqtt.subscribeTo "Room/Light/Set/Brightness" do |t, data|
-			@defaultC.set_brightness(data.to_i);
+		@mqtt.subscribeTo "Room/Light/Set/Switch" do |t, data|
+			@lightOn = true;
 			updateDefaultColor();
 		end
+
+		Thread.new() {
+			sleep 60;
+			updateDefaultColor();
+		}
+	end
+
+	def get_recommended_color()
+		return Color.rgb(0, 0, 0) unless @lightOn;
+
+		return Color.daylight if @userColor.black?
+		return Color.daylight(@userColor.get_brightness/255.0) if @userColor.white?
+		return @userColor;
 	end
 
 	def updateDefaultColor()
-		@mqtt.publishTo "Room/Light/Color", @defaultC.to_s;
-		@mqtt.publishTo "Room/Light/Brightness", @defaultC.get_brightness;
+		rColor = get_recommended_color();
 
-		@led.sendRGB(@defaultC, 3) unless @speaking;
+		@mqtt.publishTo "Room/Light/Color", rColor.to_s;
+		@led.sendRGB(rColor, 3) unless @speaking;
 	end
 
 	def queueWords(id, t, c)
@@ -60,20 +68,22 @@ class ColorSpeak
 	def speakOutQueue()
 		@speaking = true;
 
+		speechBrightness = [get_recommended_color().get_brightness, 20].max();
+
 		until @speechQueue.empty?
 			k = @speechQueue.keys[0];
 			v = @speechQueue[k];
 			while h = v.shift
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
-				@led.sendRGB(h[:c] ? h[:c].set_brightness([@defaultC.get_brightness, 20].max) : @defaultC, 0.5);
+				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : @defaultC, 0.5);
 				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
 			@speechQueue.delete k;
 		end
 
-		@led.sendRGB(@defaultC, 0.5);
 		@speaking = false;
+		updateDefaultColor();
 	end
 end
