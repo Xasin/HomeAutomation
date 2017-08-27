@@ -9,7 +9,7 @@ class Server
 		@led = led;
 		@mqtt = mqtt;
 
-		@userColor = Color.rgb(0, 0, 0);
+		@userColor = Color.RGB(0, 0, 0);
 		@speaking = false;
 
 		@speechQueue = Hash.new() do |h, k|
@@ -30,7 +30,7 @@ class Server
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Switch" do |t, data|
-			@lightOn = true;
+			@lightOn = (data == "on")
 			updateDefaultColor();
 		end
 
@@ -41,7 +41,7 @@ class Server
 	end
 
 	def get_recommended_color()
-		return Color.rgb(0, 0, 0) unless @lightOn;
+		return Color.RGB(0, 0, 0) unless @lightOn;
 
 		return Color.daylight if @userColor.black?
 		return Color.daylight(@userColor.get_brightness/255.0) if @userColor.white?
@@ -70,7 +70,7 @@ class Server
 	def speakOutQueue()
 		@speaking = true;
 
-		speechBrightness = [get_recommended_color().get_brightness, 20].max();
+		speechBrightness = [get_recommended_color().get_brightness, 10].max();
 
 		until @speechQueue.empty?
 			k = @speechQueue.keys[0];
