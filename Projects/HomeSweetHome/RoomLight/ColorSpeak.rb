@@ -1,8 +1,10 @@
 
 require 'json'
-require_relative 'Libs/ColorUtils.rb'
+require_relative '../Libs/ColorUtils.rb'
+require_relative '../Libs/MQTTSubscriber.rb'
 
-class ColorSpeak
+module ColorSpeak
+class Server
 	def initialize(led, mqtt)
 		@led = led;
 		@mqtt = mqtt;
@@ -86,4 +88,17 @@ class ColorSpeak
 		@speaking = false;
 		updateDefaultColor();
 	end
+end
+
+class Client
+	def initialize(mqtt, topic)
+		@mqtt = mqtt;
+
+		@topic = topic;
+	end
+
+	def speak(t, c = Color.RGB(255, 255, 255))
+		@mqtt.publishTo "Room/TTS/#{@topic}", {text: t, color: c.to_s}.to_json;
+	end
+end
 end

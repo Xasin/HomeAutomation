@@ -1,7 +1,7 @@
 require 'mqtt'
 
-Process.setproctitle("switchNote");
 Process.daemon();
+Process.setproctitle("switchNote");
 require_relative 'Ruby/credentials'
 
 $connectAttempts = 0;

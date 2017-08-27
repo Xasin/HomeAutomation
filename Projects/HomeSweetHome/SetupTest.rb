@@ -1,10 +1,7 @@
-require_relative 'ColorSpeak.rb'
-require_relative 'Libs/MQTTSubscriber.rb'
-require_relative 'RoomLight/TWILight.rb'
 
-$led = RGB.new();
+require_relative 'RoomLight/ColorSpeak.rb'
+require_relative 'Libs/MQTTSubscriber.rb'
+
 $mqtt = MQTTSubs.new(MQTT::Client.new("mqtts://Internal:Internal@192.168.178.111"));
 
-$cSpeak = ColorSpeak.new($led, $mqtt);
-
-$cSpeak.queueWords("Test", "What is love", Color.RGB(255, 0, 0));
+$ts = ColorSpeak::Client.new($mqtt, "Test");

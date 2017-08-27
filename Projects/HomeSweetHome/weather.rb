@@ -7,7 +7,7 @@ require 'mqtt'
 $privateData = JSON.parse(File.read("CodeData.json"));
 $mqtt = MQTT::Client.new($privateData["host"]);
 
-$ttsTopic = "TTS/Weather";
+$ttsTopic = "Room/TTS/Weather";
 
 class WeatherInfo
 	attr_reader :city
