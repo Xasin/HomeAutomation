@@ -4,8 +4,7 @@ require_relative 'Libs/ColorUtils.rb'
 require 'json'
 require 'mqtt'
 
-$privateData = JSON.parse(File.read("CodeData.json"));
-$mqtt = MQTT::Client.new($privateData["host"]);
+require_relative 'SetupEnv.rb'
 
 $ttsTopic = "Room/TTS/Weather";
 
