@@ -1,7 +1,10 @@
 
 require 'json'
+
 require_relative '../Libs/ColorUtils.rb'
 require_relative '../Libs/MQTTSubscriber.rb'
+
+require_relative 'UserColor.rb'
 
 module ColorSpeak
 class Server
@@ -36,23 +39,26 @@ class Server
 
 		Thread.new() {
 			sleep 60;
-			updateDefaultColor();
+			updateDefaultColor(10);
 		}
 	end
 
 	def get_recommended_color()
-		return Color.RGB(0, 0, 0) unless @lightOn;
-
 		return Color.daylight if @userColor.black?
 		return Color.daylight(@userColor.get_brightness/255.0) if @userColor.white?
 		return @userColor;
 	end
 
-	def updateDefaultColor()
-		rColor = get_recommended_color();
+	def get_current_color()
+		return Color.RGB(0, 0, 0) unless @lightOn;
+		return get_recommended_color();
+	end
+
+	def updateDefaultColor(fadeSpeed = 3)
+		rColor = get_current_color
 
 		@mqtt.publishTo "Room/Light/Color", rColor.to_s, retain: true;
-		@led.sendRGB(rColor, 3) unless @speaking;
+		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
 	def queueWords(id, t, c)
@@ -78,7 +84,7 @@ class Server
 			while h = v.shift
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
-				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : @defaultC, 0.5);
+				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : get_current_color, 0.5);
 				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
@@ -86,7 +92,7 @@ class Server
 		end
 
 		@speaking = false;
-		updateDefaultColor();
+		updateDefaultColor(0.5);
 	end
 end
 
