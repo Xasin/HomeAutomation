@@ -51,7 +51,7 @@ class Server
 	def updateDefaultColor()
 		rColor = get_recommended_color();
 
-		@mqtt.publishTo "Room/Light/Color", rColor.to_s;
+		@mqtt.publishTo "Room/Light/Color", rColor.to_s, retain: true;
 		@led.sendRGB(rColor, 3) unless @speaking;
 	end
 
@@ -70,7 +70,7 @@ class Server
 	def speakOutQueue()
 		@speaking = true;
 
-		speechBrightness = [get_recommended_color().get_brightness, 10].max();
+		speechBrightness = [get_recommended_color().get_brightness, 50].max();
 
 		until @speechQueue.empty?
 			k = @speechQueue.keys[0];

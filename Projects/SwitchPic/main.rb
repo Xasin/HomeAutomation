@@ -17,9 +17,10 @@ $memberColors = {
 }
 
 $xaQTT.subscribeTo "personal/switching/+/who" do |topic, payload|
-	return if payload == "none";
+	unless payload == "none" then
 	sysName = topic[0];
 	$currentMember[sysName] = payload;
+	end
 end
 
 before do
