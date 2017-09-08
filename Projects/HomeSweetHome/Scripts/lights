@@ -1,0 +1,45 @@
+#!/usr/bin/ruby2.4
+
+require 'mqtt'
+require_relative '../Libs/ColorUtils.rb'
+
+login = File.read(File.expand_path("~/.HoT/logins/snippet.login")).strip!
+
+$lightTopic = "Room/Light/Set/"
+
+MQTT::Client.new(login).connect do |c|
+
+	$mqtt = c
+
+	def switch(status)
+		$mqtt.publish $lightTopic + "Switch", status
+	end
+
+	def color(color)
+		$mqtt.publish $lightTopic + "Color", color.to_s
+	end
+
+	if ARGV[0] == nil then
+		switch "on"
+	else
+		switch "on" if ARGV[0] == "on"
+		switch "off" if ARGV[0] == "off"
+
+		if ARGV[0] == "daylight" then
+			switch "on"
+			color Color.RGB(255, 255, 255).set_brightness((ARGV[1].to_f or 0)*255);
+		end
+
+		if(ARGV[0].downcase =~ /[a-f\d]{6}/) then
+			switch "on"
+			color "#" + ARGV[0]
+		end
+
+		if(ARGV[0].downcase =~ /(\d{4,})k/) then
+			switch "on"
+			brightness = 1;
+			brightness = ARGV[1].to_f if ARGV[1];
+			color Color.temperature($~[1].to_i, brightness);
+		end
+	end
+end
