@@ -1,0 +1,19 @@
+#!/usr/bin/ruby2.4
+
+require 'mqtt'
+require_relative '../Libs/ColorUtils.rb'
+
+login = File.read(File.expand_path("~/.HoT/logins/snippet.login")).strip!
+
+MQTT::Client.new(login).connect do |c|
+	if ARGV[0] == "off" then
+		c.publish "Room/Light/Set/Switch", "off";
+	elsif ARGV[0].to_i then
+		bNess = 1.0;
+		bNess = ARGV[1].to_i/100.0 unless ARGV[1] == nil;
+		oString = Color.temperature(ARGV[0].to_i, bNess).to_s;
+
+		c.publish "Room/Light/Set/Color", oString;
+		c.publish "Room/Light/Set/Switch", "on";
+	end
+end
