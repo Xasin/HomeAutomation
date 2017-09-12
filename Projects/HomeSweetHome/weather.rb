@@ -128,9 +128,7 @@ class WeatherInfo
 end
 
 def speak(t, color = nil)
-	$mqtt.connect do |c|
-		c.publish $ttsTopic, {text: t, color: color.to_s}.to_json;
-	end
+	$mqtt.publishTo $ttsTopic, {text: t, color: color.to_s}.to_json;
 end
 
 def isInteresting(t)
@@ -139,7 +137,7 @@ def isInteresting(t)
 	return false;
 end
 
-$w = WeatherInfo.new($privateData["apikey"], "Steinfeld");
+$w = WeatherInfo.new(File.read(File.expand_path("~/.HoT/logins/weather.login")).strip!, "Steinfeld");
 i = 0;
 $w.fiveday_data()["list"].each do |d|
 	if isInteresting(d["dt"].to_i) then
