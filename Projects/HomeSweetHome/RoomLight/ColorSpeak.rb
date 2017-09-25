@@ -86,7 +86,7 @@ class Server
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
-	def queueWords(id, t, c)
+	def queueWords(id, t, c = nil)
 		@speechQueue[id].push({t: t, c: c});
 
 		return if @speaking;
@@ -110,7 +110,7 @@ class Server
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
 				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : get_current_color, 0.5);
-				system('espeak -s 150 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
+				system('espeak -s 140 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
 			@speechQueue.delete k;
