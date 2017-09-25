@@ -21,7 +21,11 @@ class Server
 			h = JSON.parse(data);
 			return unless h.key? "text";
 
-			c = h.key?("color") ? Color.from_s(h["color"]) : nil;
+			begin
+				c = h.key?("color") ? Color.from_s(h["color"]) : nil;
+			rescue
+				c = nil;
+			end
 			queueWords(t[0], h["text"], c);
 		end
 
@@ -42,6 +46,14 @@ class Server
 			elsif(data == "ld") then
 				@lightOn = true;
 				@userColor = Color.RGB(0, 0, 0);
+				updateDefaultColor();
+			elsif(data =~ /lh([\d]{1,3})/) then
+				@lightOn = true;
+				@userColor = Color.HSV($~[1].to_i);
+				updateDefaultColor();
+			elsif(data =~ /l([\da-f]{6})/) then
+				@lightOn = true;
+				@userColor = Color.from_s("#" + $~[1]);
 				updateDefaultColor();
 			end
 		end
