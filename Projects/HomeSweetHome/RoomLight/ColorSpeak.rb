@@ -4,8 +4,6 @@ require 'json'
 require_relative '../Libs/ColorUtils.rb'
 require_relative '../Libs/MQTTSubscriber.rb'
 
-require_relative 'UserColor.rb'
-
 module ColorSpeak
 class Server
 	def initialize(led, mqtt)
@@ -37,10 +35,24 @@ class Server
 			updateDefaultColor();
 		end
 
+		@mqtt.subscribeTo "Room/Commands" do |tList, data|
+			if(data == "e") then
+				@lightOn = not(@lightOn);
+				updateDefaultColor();
+			elsif(data == "ld") then
+				@lightOn = true;
+				@userColor = Color.RGB(0, 0, 0);
+				updateDefaultColor();
+			end
+		end
+
 		Thread.new() {
-			sleep 60;
-			updateDefaultColor(10);
-		}
+			while true do 
+				sleep 10
+				updateDefaultColor(10) unless (@skipUpdateColor or not(@lightOn))
+				@skipUpdateColor = false;
+			end
+		}.abort_on_exception = true
 	end
 
 	def get_recommended_color()
@@ -55,6 +67,7 @@ class Server
 	end
 
 	def updateDefaultColor(fadeSpeed = 3)
+		@skipUpdateColor = true;
 		rColor = get_current_color
 
 		@mqtt.publishTo "Room/Light/Color", rColor.to_s, retain: true;
