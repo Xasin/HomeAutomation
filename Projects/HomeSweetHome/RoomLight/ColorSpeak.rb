@@ -103,8 +103,13 @@ class Client
 		@topic = topic;
 	end
 
-	def speak(t, c = Color.RGB(255, 255, 255))
-		@mqtt.publishTo "Room/TTS/#{@topic}", {text: t, color: c.to_s}.to_json;
+	def speak(t, c = nil)
+		outData = {
+			text: t
+		};
+		outData[:color] = c if c;
+
+		@mqtt.publishTo "Room/TTS/#{@topic}", outData.to_json;
 	end
 end
 end
