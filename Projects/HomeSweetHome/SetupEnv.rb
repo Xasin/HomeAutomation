@@ -5,6 +5,6 @@ require_relative 'Libs/CoreExtensions.rb'
 
 login ||= File.read(File.expand_path("~/.HoT/logins/snippet.login")).strip!
 
-$mqtt ||= MQTTSubs.new(MQTT::Client.new(login));
+$mqtt ||= MQTT::SubHandler.new(login);
 sleep 1;
 $testSpeak = ColorSpeak::Client.new($mqtt, "Test");

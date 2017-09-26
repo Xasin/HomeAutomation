@@ -3,6 +3,7 @@ require 'json'
 
 require_relative '../Libs/ColorUtils.rb'
 require_relative '../Libs/MQTTSubscriber.rb'
+require_relative '../Libs/Waitpoint.rb'
 
 module ColorSpeak
 class Server
@@ -17,54 +18,59 @@ class Server
 			h[k] = Array.new();
 		end
 
+		@newMessageWaitpoint = Xasin::Waitpoint.new();
+
 		@mqtt.subscribeTo "Room/TTS/+" do |t, data|
-			h = JSON.parse(data);
-			return unless h.key? "text";
+			h = JSON.parse(data, symbolize_names: true);
 
 			begin
-				c = h.key?("color") ? Color.from_s(h["color"]) : nil;
+				h[:color] = h.key?(:color) ? Color.from_s(h[:color]) : nil;
 			rescue
-				c = nil;
+				h[:color] = nil;
 			end
-			queueWords(t[0], h["text"], c);
+			queue_message(t[0], h);
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
 			@userColor = Color.from_s(data);
-			updateDefaultColor();
+			update_current_color();
 		end
 
 		@mqtt.subscribeTo "Room/Light/Set/Switch" do |t, data|
 			@lightOn = (data == "on")
-			updateDefaultColor();
+			update_current_color();
 		end
 
 		@mqtt.subscribeTo "Room/Commands" do |tList, data|
 			if(data == "e") then
 				@lightOn = not(@lightOn);
-				updateDefaultColor();
+				update_current_color();
 			elsif(data == "ld") then
 				@lightOn = true;
 				@userColor = Color.RGB(0, 0, 0);
-				updateDefaultColor();
+				update_current_color();
 			elsif(data =~ /lh([\d]{1,3})/) then
 				@lightOn = true;
 				@userColor = Color.HSV($~[1].to_i);
-				updateDefaultColor();
+				update_current_color();
 			elsif(data =~ /l([\da-f]{6})/) then
 				@lightOn = true;
 				@userColor = Color.from_s("#" + $~[1]);
-				updateDefaultColor();
+				update_current_color();
 			end
 		end
 
-		Thread.new() {
-			while true do 
+		Thread.new() do
+			while true do
 				sleep 10
-				updateDefaultColor(10) unless (@skipUpdateColor or not(@lightOn))
+				update_current_color(10) unless (@skipUpdateColor or not(@lightOn))
 				@skipUpdateColor = false;
 			end
-		}.abort_on_exception = true
+		end
+
+		Thread.new do
+			speak_out_queue();
+		end
 	end
 
 	def get_recommended_color()
@@ -78,7 +84,7 @@ class Server
 		return get_recommended_color();
 	end
 
-	def updateDefaultColor(fadeSpeed = 3)
+	def update_current_color(fadeSpeed = 3)
 		@skipUpdateColor = true;
 		rColor = get_current_color
 
@@ -86,22 +92,16 @@ class Server
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
-	def queueWords(id, t, c = nil)
-		@speechQueue[id].push({t: t, c: c});
+	def queue_message(id, data)
+		@speechQueue.delete id if(data[:single]);
 
-		return if @speaking;
+		@speechQueue[id].push(data);
 
-		@speaking = true;
-		@speechThread = Thread.new() {
-			speakOutQueue();
-		}
-		@speechThread.abort_on_exception = true;
+		@newMessageWaitpoint.fire();
 	end
 
-	def speakOutQueue()
-		@speaking = true;
-
-		speechBrightness = [get_recommended_color().get_brightness, 50].max();
+	def speak_out_queue()
+		@newMessageWaitpoint.wait();
 
 		until @speechQueue.empty?
 			k = @speechQueue.keys[0];
@@ -109,15 +109,17 @@ class Server
 			while h = v.shift
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
-				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : get_current_color, 0.5);
-				system('espeak -s 140 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
+				@speaking = true;
+					speechBrightness = [get_recommended_color().get_brightness, 50].max();
+					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
+					system('espeak -s 140 -g 3 "' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
+				@speaking = false;
 			end
 
 			@speechQueue.delete k;
 		end
 
-		@speaking = false;
-		updateDefaultColor(0.5);
+		update_current_color(0.5);
 	end
 end
 
@@ -128,11 +130,13 @@ class Client
 		@topic = topic;
 	end
 
-	def speak(t, c = nil)
+	def speak(t, c = nil, single: nil, notoast: false)
 		outData = {
 			text: t
 		};
-		outData[:color] = c if c;
+		outData[:color] 	= c 		if c;
+		outData[:single] 	= true 	if single;
+		outData[:notoast] = true	if notoast;
 
 		@mqtt.publishTo "Room/TTS/#{@topic}", outData.to_json;
 	end

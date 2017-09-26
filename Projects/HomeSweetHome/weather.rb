@@ -2,11 +2,10 @@
 require_relative 'Libs/CoreExtensions.rb'
 require_relative 'Libs/ColorUtils.rb'
 require 'json'
-require 'mqtt'
 
 require_relative 'SetupEnv.rb'
 
-$ttsTopic = "Room/TTS/Weather";
+$ttsTopic = ColorSpeak::Client.new($mqtt, "Weather");
 
 class WeatherInfo
 	attr_reader :city
@@ -127,22 +126,4 @@ class WeatherInfo
 	end
 end
 
-def speak(t, color = nil)
-	$mqtt.publishTo $ttsTopic, {text: t, color: color.to_s}.to_json;
-end
-
-def isInteresting(t)
-	h = Time.at(t).hour;
-	return true if h.between?(7, 22);
-	return false;
-end
-
-$w = WeatherInfo.new(File.read(File.expand_path("~/.HoT/logins/weather.login")).strip!, "Steinfeld");
-i = 0;
-$w.fiveday_data()["list"].each do |d|
-	if isInteresting(d["dt"].to_i) then
-		speak($w.readable_forecast(d, temperature: true, forceDay: i==0), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5));
-		i += 1;
-	end
-	break if i >= 5;
-end
+$weather ||= WeatherInfo.new(File.read(File.expand_path("~/.HoT/logins/weather.login")).strip!, "Hannover");
