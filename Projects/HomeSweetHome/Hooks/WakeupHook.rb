@@ -1,4 +1,3 @@
-
 require_relative '../SetupEnv.rb'
 
 module Hooks
@@ -25,14 +24,23 @@ module Hooks
 			end
 		end
 
+		def set_alarm(time = 7.hours)
+			@alarmTime =  Time.today(time);
+                        @alarmTime += 24.hours if @alarmTime <= Time.now();
+                     	@wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}"
+
+                	@AlarmThread.run
+		end
+		module_function :set_alarm
+
 		$mqtt.subscribeTo "Room/Commands" do |t, data|
 			if(data == "clk" and not @alarmTime) then
-				@alarmTime =  Time.today(21.hours + 56.minutes);
-				@alarmTime += 24.hours if @alarmTime <= Time.now();
-				@wakeupTTS.speak "Alarm set for 7am"
-
-				@AlarmThread.run
+				set_alarm
 			end
+		end
+
+		$mqtt.subscribeTo "Room/Alarm/Set" do |t, data|
+			set_alarm(data.to_f.hours);
 		end
 	end
 end
