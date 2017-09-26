@@ -13,6 +13,7 @@ module Printer
 $mqtt.subscribeTo "octoprint/event/PrintStarted" do
 	@printTTS.speak("Print started", Color.RGB(0, 255, 200));
 	@printerData[:status] = :bed_check;
+	@printerData[:lastProgress] = 0;
 end
 
 $mqtt.subscribeTo "octoprint/progress/printing" do |topic, data|
@@ -79,7 +80,7 @@ $mqtt.subscribeTo "octoprint/event/MetadataAnalysisFinished" do |topic, data|
 	mString = "#{m} minutes";
 	mString = "1 minute" if m == 1;
 
-	@printTTS.speak "Analysis finished. The print will take #{hString} #{mString}.", Color.RGB(0, 0, 255);
+	@printTTS.speak "Analysis finished. The print will take #{hString} #{mString}.", Color.RGB(0, 150, 255);
 end
 
 
