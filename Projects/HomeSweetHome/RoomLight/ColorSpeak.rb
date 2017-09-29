@@ -82,7 +82,8 @@ class Server
 		@skipUpdateColor = true;
 		rColor = get_current_color
 
-		@mqtt.publishTo "Room/Light/Color", rColor.to_s, retain: true;
+		@mqtt.publishTo "Room/Light/Color",  rColor.to_s, retain: true, qos: 1;
+		@mqtt.publishTo "Room/Light/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
@@ -110,7 +111,7 @@ class Server
 				next if h[:t] =~ /[^\w\s\.,-:+']/;
 
 				@led.sendRGB(h[:c] ? h[:c].set_brightness(speechBrightness) : get_current_color, 0.5);
-				system('espeak -s 140 -g 3 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
+				system('espeak -s 140 -g 3 -a 200 "' + h[:t] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 			end
 
 			@speechQueue.delete k;
