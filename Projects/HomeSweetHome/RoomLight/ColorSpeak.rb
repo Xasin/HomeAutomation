@@ -70,7 +70,7 @@ class Server
 
 		Thread.new do
 			speak_out_queue();
-		end
+		end.abort_on_exception = true;
 	end
 
 	def get_recommended_color()
@@ -108,7 +108,8 @@ class Server
 			k = @speechQueue.keys[0];
 			v = @speechQueue[k];
 			while h = v.shift
-				next if h[:t] =~ /[^\w\s\.,-:+']/;
+				next unless h.has_key? :text
+				next if h[:text] =~ /[^\w\s\.,-:+']/;
 
 				@speaking = true;
 					speechBrightness = [get_recommended_color().get_brightness, 50].max();
