@@ -11,19 +11,18 @@ module Welcome
 
 @welcomeTTS = ColorSpeak::Client.new($mqtt, "Welcome");
 
-@formerState = "false";
+@switchTrack = $mqtt.track "personal/switching/Xasin/who";
 
-$mqtt.subscribe_to "personal/Xasin/IsHome" do |tList, data|
-	if(data == "true" and @formerState != "true") then
-		who = @SystemColors.key?($switchedInMember) ? $switchedInMember : "David"
+$mqtt.track "personal/Xasin/IsHome" do |data|
+	if(data == "true") then
+		who = @SystemColors.key?(@switchTrack.value) ? @switchTrack.value : "David"
 
 		@welcomeTTS.speak "Welcome back home, #{who}", @SystemColors[who];
 		if(Time.today(18.hours) < Time.now()) then
 			$mqtt.publish_to "Room/Light/Set/Switch", "on", retain: true
 		end
 	end
-	@formerState = data;
 end
 
-end 
+end
 end
