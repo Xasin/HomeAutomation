@@ -6,7 +6,7 @@ require_relative 'MQTTSubscriber.rb'
 require_relative "credentials"
 require_relative "SwitchHandler.rb"
 
-$xaQTT = MQTTSubs.new(MQTT::Client.new($mqtt_host));
+$xaQTT = MQTT::SubHandler.new $mqtt_host
 
 $switchTime = SwitchHandler.new("SwitchTimes.db");
 

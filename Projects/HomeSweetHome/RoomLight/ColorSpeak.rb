@@ -69,7 +69,9 @@ class Server
 		end
 
 		Thread.new do
-			speak_out_queue();
+			while(true) do
+				speak_out_queue();
+			end
 		end.abort_on_exception = true;
 	end
 
@@ -94,7 +96,7 @@ class Server
 	end
 
 	def queue_message(id, data)
-		@speechQueue.delete id if(data[:single]);
+		@speechQueue[id].clear if(data[:single]);
 
 		@speechQueue[id].push(data);
 
@@ -114,7 +116,7 @@ class Server
 				@speaking = true;
 					speechBrightness = [get_recommended_color().get_brightness, 50].max();
 					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
-					system('espeak -s 140 -g 3 -a 200"' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
+					system('espeak -s 140 -g 3 -a 200 "' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 				@speaking = false;
 			end
 
