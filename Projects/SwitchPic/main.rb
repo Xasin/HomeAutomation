@@ -7,7 +7,7 @@ require_relative "credentials.rb"
 set :port, 80
 set :bind, "0.0.0.0"
 
-$xaQTT = MQTTSubs.new(MQTT::Client.new($mqtt_host));
+$xaQTT = MQTT::SubHandler.new $mqtt_host
 
 $currentMember = Hash.new() do |h, k| $h[k] = "none"; end
 $memberColors = {
