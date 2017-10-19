@@ -12,11 +12,11 @@ MQTT::Client.new(login).connect do |c|
 	$mqtt = c
 
 	def switch(status)
-		$mqtt.publish $lightTopic + "Switch", status
+		$mqtt.publish $lightTopic + "Switch", status, retain: true
 	end
 
 	def color(color)
-		$mqtt.publish $lightTopic + "Color", color.to_s
+		$mqtt.publish $lightTopic + "Color", color.to_s, retain: true
 	end
 
 	if ARGV[0] == nil then
@@ -40,6 +40,23 @@ MQTT::Client.new(login).connect do |c|
 			brightness = 1;
 			brightness = ARGV[1].to_f if ARGV[1];
 			color Color.temperature($~[1].to_i, brightness);
+		end
+
+		if(ARGV[0].downcase == "rainbow") then
+			puts "Starting rainbow awesomeness!"
+			cHue = 0;
+			sendThread = Thread.new {
+				while true
+					Thread.stop
+					color Color.HSV(cHue);
+				end
+			}
+
+			while true
+				sendThread.run
+				sleep 3;
+				cHue += 10;
+			end
 		end
 	end
 end
