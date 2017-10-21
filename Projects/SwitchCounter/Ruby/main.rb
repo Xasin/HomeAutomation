@@ -23,7 +23,7 @@ debugCFG = {
 timingCFG = normalCFG;
 
 
-$xaQTT.subscribeTo 'personal/switching/+/who' do |topic, payload|
+$xaQTT.subscribeTo 'Personal/+/Switching/who' do |topic, payload|
 	sysName = topic[0];
 	$switchTime.switchTo(sysName, payload) unless sysName == nil;
 end
@@ -37,6 +37,6 @@ while true
 		packData = Hash.new();
 		packData[:percentage] 	= $switchTime.getPercentagesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
 		packData[:total] 			= $switchTime.getTimesSince(key, Time.now.to_i - timingCFG[:measureTimespan]);
-		$xaQTT.publishTo "personal/switching/#{key}/data", packData.to_json, retain: true;
+		$xaQTT.publishTo "Personal/#{key}/Switching/Data", packData.to_json, retain: true;
 	end
 end

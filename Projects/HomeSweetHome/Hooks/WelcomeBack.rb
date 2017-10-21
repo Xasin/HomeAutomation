@@ -11,9 +11,9 @@ module Welcome
 
 @welcomeTTS = ColorSpeak::Client.new($mqtt, "Welcome");
 
-@switchTrack = $mqtt.track "personal/switching/Xasin/who";
+@switchTrack = $mqtt.track "Personal/Xasin/Switching/Who";
 
-$mqtt.track "personal/Xasin/IsHome" do |data|
+$mqtt.track "Personal/Xasin/IsHome" do |data|
 	if(data == "true") then
 		who = @SystemColors.key?(@switchTrack.value) ? @switchTrack.value : "David"
 

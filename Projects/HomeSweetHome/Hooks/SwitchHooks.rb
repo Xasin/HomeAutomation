@@ -12,7 +12,7 @@ module Hooks
 
 		@switchTTS    = ColorSpeak::Client.new($mqtt, "Switching");
 
-		$mqtt.track "personal/switching/Xasin/who" do |newMember, formerMember|
+		$mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
 			formerMember ||= "none";
 
 			if(newMember != "none" and formerMember == "none") then
