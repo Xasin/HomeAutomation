@@ -5,18 +5,18 @@ require_relative '../Libs/ColorUtils.rb'
 
 login = File.read(File.expand_path("~/.HoT/logins/snippet.login")).strip!
 
-$lightTopic = "Room/Light/Set/"
+$lightTopic = "Room/default/Lights/Set/"
 
 MQTT::Client.new(login).connect do |c|
 
 	$mqtt = c
 
 	def switch(status)
-		$mqtt.publish $lightTopic + "Switch", status, retain: true
+		$mqtt.publish $lightTopic + "Switch", status
 	end
 
 	def color(color)
-		$mqtt.publish $lightTopic + "Color", color.to_s, retain: true
+		$mqtt.publish $lightTopic + "Color", color.to_s
 	end
 
 	if ARGV[0] == nil then

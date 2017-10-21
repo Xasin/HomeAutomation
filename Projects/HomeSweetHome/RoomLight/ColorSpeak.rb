@@ -7,9 +7,11 @@ require_relative '../Libs/Waitpoint.rb'
 
 module ColorSpeak
 class Server
-	def initialize(led, mqtt)
+	def initialize(led, mqtt, roomName = "default")
 		@led = led;
 		@mqtt = mqtt;
+
+		@RoomName = roomName;
 
 		@userColor = Color.RGB(0, 0, 0);
 		@speaking = false;
@@ -20,7 +22,7 @@ class Server
 
 		@newMessageWaitpoint = Xasin::Waitpoint.new();
 
-		@mqtt.subscribeTo "Room/TTS/+" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/TTS" do |t, data|
 			h = JSON.parse(data, symbolize_names: true);
 
 			begin
@@ -28,20 +30,27 @@ class Server
 			rescue
 				h[:color] = nil;
 			end
-			queue_message(t[0], h);
+			queue_message(h[:gid] || "default", h);
 		end
 
-		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
-			@userColor = Color.from_s(data);
-			update_current_color();
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Color" do |t, data|
+			begin
+				data = JSON.parse(data, symbolize_names: true);
+			rescue
+				@userColor = Color.from_s(data);
+				update_current_color();
+			else
+				@userColor = Color.from_s(data[:color]);
+				update_current_color(data[:speed]);
+			end
 		end
 
-		@mqtt.subscribeTo "Room/Light/Set/Switch" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Switch" do |t, data|
 			@lightOn = (data == "on")
 			update_current_color();
 		end
 
-		@mqtt.subscribeTo "Room/Commands" do |tList, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
 				@lightOn = not(@lightOn);
 				update_current_color();
@@ -90,8 +99,8 @@ class Server
 		@skipUpdateColor = true;
 		rColor = get_current_color
 
-		@mqtt.publishTo "Room/Light/Color",  rColor.to_s, retain: true, qos: 1;
-		@mqtt.publishTo "Room/Light/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
+		@mqtt.publish_to "Room/#{@RoomName}/Lights/Color",  rColor.to_s, retain: true, qos: 1;
+		@mqtt.publish_to "Room/#{@RoomName}/Lights/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
@@ -128,21 +137,24 @@ class Server
 end
 
 class Client
-	def initialize(mqtt, topic)
+	def initialize(mqtt, topic, roomName = "default")
 		@mqtt = mqtt;
+
+		@roomName = roomName;
 
 		@topic = topic;
 	end
 
 	def speak(t, c = nil, single: nil, notoast: false)
 		outData = {
-			text: t
+			text: 	t,
+			gid:	@topic,
 		};
 		outData[:color] 	= c 		if c;
 		outData[:single] 	= true 	if single;
-		outData[:notoast] = true	if notoast;
+		outData[:notoast] 	= true	if notoast;
 
-		@mqtt.publishTo "Room/TTS/#{@topic}", outData.to_json;
+		@mqtt.publishTo "Room/#{@RoomName}/TTS", outData.to_json;
 	end
 end
 end
