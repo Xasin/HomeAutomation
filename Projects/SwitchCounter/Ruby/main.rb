@@ -12,7 +12,7 @@ $switchTime = SwitchHandler.new("SwitchTimes.db");
 
 normalCFG = {
 	updateInterval: 	3*60,
-	measureTimespan:	3*24*60*60
+	measureTimespan:	6*24*60*60
 }
 
 debugCFG = {
