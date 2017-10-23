@@ -16,9 +16,9 @@ module Hooks
 			formerMember ||= "none";
 
 			if(newMember != "none" and formerMember == "none") then
-				@switchTTS.speak "Good morning, #{data}", @SystemColors[data], single: true;
+				@switchTTS.speak "Good morning, #{newMember}", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				@switchTTS.speak "Hello, #{data}", @SystemColors[data], single: true;
+				@switchTTS.speak "Hello, #{newMember}", @SystemColors[newMember], single: true;
 			elsif(formerMember != "none") then
 				@switchTTS.speak "Good night, #{@formerMember}", @SystemColors[@formerMember], single: true;
 			end
