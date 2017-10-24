@@ -23,7 +23,7 @@ debugCFG = {
 timingCFG = normalCFG;
 
 
-$xaQTT.subscribeTo 'Personal/+/Switching/who' do |topic, payload|
+$xaQTT.subscribeTo 'Personal/+/Switching/Who' do |topic, payload|
 	sysName = topic[0];
 	$switchTime.switchTo(sysName, payload) unless sysName == nil;
 end
