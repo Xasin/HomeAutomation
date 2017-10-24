@@ -146,7 +146,7 @@ class Client
 	def initialize(mqtt, topic, roomName = "default")
 		@mqtt = mqtt;
 
-		@roomName = roomName;
+		@RoomName = roomName;
 
 		@topic = topic;
 	end
