@@ -13,7 +13,7 @@ module Hooks
 				Thread.stop() until @alarmTime;
 
 				sleep [0.5, [2.minutes, (@alarmTime - Time.now())*0.9].min].max
-				
+
 				if(Time.now() >= @alarmTime) then
 					@weatherTime = @alarmTime + 5.minutes;
 					@WeatherThread.run();
@@ -39,14 +39,24 @@ module Hooks
 				if(Time.now() >= @weatherTime) then
 					@weatherTime = nil;
 
-					@weatherTTS.speak "And now, the weather report: "
-					sleep 5;
+					begin
+						@wData = $weater.fiveday_data["list"];
+					rescue
+					end
 
-					first = true;
-					$weather.fiveday_data["list"].each do |d|
-						break if d["dt"].to_i >= Time.today(21.hours).to_i;
-						@weatherTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
-						first = false;
+					if @wData
+						@weatherTTS.speak "And now, the weather report: "
+						sleep 3;
+
+						first = true;
+						wData.fiveday_data["list"].each do |d|
+							next  if d["dt"].to_i <= Time.now();
+							break if d["dt"].to_i >= Time.today(21.hours).to_i;
+							@weatherTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
+							first = false;
+						end
+					else
+						@weatherTTS.speak "Weather forecast currently unavailable."
 					end
 				end
 			end
