@@ -12,7 +12,7 @@ module Hooks
 
 		@switchTTS    = ColorSpeak::Client.new($mqtt, "Switching");
 
-		$mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
+		@who = $mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
 			formerMember ||= "none";
 
 			if(newMember != "none" and formerMember == "none") then
@@ -22,6 +22,33 @@ module Hooks
 			elsif(formerMember != "none") then
 				@switchTTS.speak "Good night, #{formerMember}", @SystemColors[formerMember], single: true;
 			end
+		end
+
+		$mqtt.subscribe_to "Room/default/Commands" do |tList, data|
+		if(data == "good morning") then
+			Thread.new do
+				sleepTime = Time.now() + 1.minutes;
+
+				while true do
+					sleep 5;
+
+					if(@who.value != "none") then
+						break;
+					end
+
+					if(Time.now >= sleepTime) then
+						@switchTTS.speak "Please remember", @SystemColors["Xasin"]
+						@switchTTS.speak "to log", @SystemColors["Neira"]
+						@switchTTS.speak "your switch", @SystemColors["Mesh"]
+						break;
+					end
+				end
+			end
+		end
+
+		if(data =~ /sw([nmxs])/) then
+			$mqtt.publish_to "Personal/Xasin/Switching/Who", {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1], retain: true;
+		end
 		end
 	end
 end
