@@ -27,7 +27,7 @@ module Hooks
 		$mqtt.subscribe_to "Room/default/Commands" do |tList, data|
 		if(data == "good morning") then
 			Thread.new do
-				sleepTime = Time.now() + 1.minutes;
+				sleepTime = Time.now() + 15.minutes;
 
 				while true do
 					sleep 5;
