@@ -45,20 +45,16 @@ class Server
 
 		@mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
-				@lightOn = not(@lightOn);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", not(@lightOn), retain: true;
 			elsif(data == "ld") then
-				@lightOn = true;
-				@userColor = Color.RGB(0, 0, 0);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", true, retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.RGB(0,0,0).to_s, retain: true;
 			elsif(data =~ /lh([\d]{1,3})/) then
-				@lightOn = true;
-				@userColor = Color.HSV($~[1].to_i);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", true, retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.HSV($~[1].to_i).to_s, retain: true;
 			elsif(data =~ /l([\da-f]{6})/) then
-				@lightOn = true;
-				@userColor = Color.from_s("#" + $~[1]);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", true, retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.from_s("#" + $~[1]).to_s, retain: true;
 			end
 		end
 
