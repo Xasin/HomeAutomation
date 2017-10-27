@@ -10,17 +10,18 @@ module Hooks
 			"Mesh"  => Color.RGB(0, 255, 0)
 		}
 
-		@switchTTS    = ColorSpeak::Client.new($mqtt, "Switching");
+		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
+		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
 
 		@who = $mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
 			formerMember ||= "none";
 
 			if(newMember != "none" and formerMember == "none") then
-				@switchTTS.speak "Good morning, #{newMember}", @SystemColors[newMember], single: true;
+				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				$messageDistributor.forward_message({text: "Hello #{newMember}", color: @SystemColors[newMember].to_s, single: true});
+				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember].to_s, single: true;
 			elsif(formerMember != "none") then
-				@switchTTS.speak "Good night, #{formerMember}", @SystemColors[formerMember], single: true;
+				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember], single: true;
 			end
 		end
 

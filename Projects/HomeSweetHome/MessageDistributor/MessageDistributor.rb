@@ -67,7 +67,7 @@ module Messaging
 		end
 	end
 
-	class Client
+	class UserClient
 		def initialize(mqtt, name, gid = nil)
 			@mqtt = mqtt;
 			@Name = name;
@@ -76,7 +76,7 @@ module Messaging
 
 		def notify(data)
 			data[:gid] ||= @GID if @GID;
-			$mqtt.publish_to "Personal/#{@Name}/Notify", data.to_json, qos: 2;
+			@mqtt.publish_to "Personal/#{@Name}/Notify", data.to_json, qos: 2;
 		end
 
 		def speak(text, color = nil, **args)

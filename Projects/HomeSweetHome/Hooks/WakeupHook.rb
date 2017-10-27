@@ -24,7 +24,7 @@ module Hooks
 					$mqtt.publishTo "Room/default/Lights/Set/Switch", "on";
 					$mqtt.publishTo "Room/default/Lights/Set/Color", Color.RGB(0, 0, 0);
 
-					@wakeupTTS.speak "Good morning, David"
+					@wakeupTTS.speak "Good morning, David."
 				end
 			end
 		end
@@ -51,7 +51,7 @@ module Hooks
 						sleep 3;
 
 						first = true;
-						wData.fiveday_data["list"].each do |d|
+						@wData.fiveday_data["list"].each do |d|
 							next  if d["dt"].to_i <= Time.now();
 							break if d["dt"].to_i >= Time.today(21.hours).to_i;
 							@weatherTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
