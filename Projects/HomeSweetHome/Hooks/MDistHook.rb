@@ -5,8 +5,6 @@ module Messaging
 	@telegramGIDTable = Hash.new();
 
 	@telegramMEndpoint = Messaging::Endpoint.new() do |data|
-		puts "TTS forwarding the message: #{data}\n"
-
 		if(data[:single] and data[:gid] and @telegramGIDTable[data[:gid]]) then
 			$telegram.delete_message(@telegramGIDTable[data[:gid]]);
 		end
@@ -21,7 +19,6 @@ module Messaging
 	$messageDistributor = Messaging::Distributor.new($mqtt, "Xasin", @telegramMEndpoint);
 
 	@ttsMEndpoint = $messageDistributor.add_endpoint() do |data|
-		puts "TTS forwarding the message: #{data}\n"
 		$cSpeak.process_message(data);
 	end
 	$mqtt.track "Personal/Xasin/IsHome" do |newState|

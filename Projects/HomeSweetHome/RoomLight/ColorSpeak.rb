@@ -124,7 +124,7 @@ class Server
 			v = @speechQueue[k];
 			while h = v.shift
 				next unless h.has_key? :text
-				next if h[:text] =~ /[^\w\s\.,-:+']/;
+				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
 					speechBrightness = [get_recommended_color().get_brightness, 50].max();
