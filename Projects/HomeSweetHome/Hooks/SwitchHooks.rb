@@ -18,7 +18,7 @@ module Hooks
 			if(newMember != "none" and formerMember == "none") then
 				@switchTTS.speak "Good morning, #{newMember}", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				@switchTTS.speak "Hello #{newMember}", @SystemColors[newMember], single: true;
+				$messageDistributor.forward_message({text: "Hello #{newMember}", color: @SystemColors[newMember].to_s, single: true});
 			elsif(formerMember != "none") then
 				@switchTTS.speak "Good night, #{formerMember}", @SystemColors[formerMember], single: true;
 			end
