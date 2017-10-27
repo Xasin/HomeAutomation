@@ -16,7 +16,7 @@ module Messaging
 	@telegramMEndpoint.priority  	= -1;
 	@telegramMEndpoint.secret		= true;
 
-	$messageDistributor = Messaging::Distributor.new(@telegramMEndpoint);
+	$messageDistributor = Messaging::Distributor.new($mqtt, "Xasin", @telegramMEndpoint);
 
 	@ttsMEndpoint = $messageDistributor.add_endpoint() do |data|
 		$cSpeak.process_message(data);
