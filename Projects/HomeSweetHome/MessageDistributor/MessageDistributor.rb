@@ -42,7 +42,7 @@ module Messaging
 		end
 
 		def add_endpoint(&callback)
-			newEndpoint = Endpoint.new(callback);
+			newEndpoint = Endpoint.new(&callback);
 			@endpointList << newEndpoint
 
 			return newEndpoint;
