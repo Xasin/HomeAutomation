@@ -25,6 +25,8 @@ module Messaging
 				loop do
 					toProcessMessage = @messageQueue.pop;
 
+					puts "Processing message: \n#{toProcessMessage}\n";
+
 					bestEndpoint = @endpointList[0];
 					@endpointList.each do |e|
 						if(e.available and (e.priority > bestEndpoint.priority) and (e.secret or not toProcessMessage[:secret])) then
