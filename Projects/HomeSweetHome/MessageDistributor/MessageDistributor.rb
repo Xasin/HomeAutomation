@@ -15,7 +15,7 @@ module Messaging
 
 			@mqtt.subscribe_to "Personal/#{@name}/Notify" do |tList, data|
 				begin
-					JSON.parse(data, symbolize_names: true);
+					data = JSON.parse(data, symbolize_names: true);
 					forward_message(data);
 				rescue
 				end
@@ -64,6 +64,28 @@ module Messaging
 
 		def forward_message(data)
 			@data_callback.call(data);
+		end
+	end
+
+	class Client
+		def initialize(mqtt, name, gid = nil)
+			@mqtt = mqtt;
+			@Name = name;
+			@GID  = gid;
+		end
+
+		def notify(data)
+			data[:gid] ||= @GID if @GID;
+			$mqtt.publish_to "Personal/#{@Name}/Notify", data.to_json, qos: 2;
+		end
+
+		def speak(text, color = nil, **args)
+			args ||= Hash.new();
+
+			args[:text] 	= text;
+			args[:color] 	= color if color;
+
+			notify(args);
 		end
 	end
 end
