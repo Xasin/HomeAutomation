@@ -22,16 +22,18 @@ module Messaging
 			end
 
 			Thread.new do
-				toProcessMessage = @messageQueue.pop;
+				loop do
+					toProcessMessage = @messageQueue.pop;
 
-				bestEndpoint = @endpointList[0];
-				@endpointList.each do |e|
-					if(e.available and (e.priority > bestEndpoint.priority) and (e.secret or not toProcessMessage[:secret])) then
-						bestEndpoint = e;
+					bestEndpoint = @endpointList[0];
+					@endpointList.each do |e|
+						if(e.available and (e.priority > bestEndpoint.priority) and (e.secret or not toProcessMessage[:secret])) then
+							bestEndpoint = e;
+						end
 					end
-				end
 
-				bestEndpoint.forward_message(toProcessMessage);
+					bestEndpoint.forward_message(toProcessMessage);
+				end
 			end
 		end
 
