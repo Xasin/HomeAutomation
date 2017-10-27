@@ -23,7 +23,8 @@ class Server
 		@newMessageWaitpoint = Xasin::Waitpoint.new();
 
 		@mqtt.subscribe_to "Room/#{@RoomName}/TTS" do |t, data|
-			process_message(data);
+			h = JSON.parse(data, symbolize_names: true);
+			process_message(h);
 		end
 
 		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Color" do |t, data|
@@ -96,8 +97,6 @@ class Server
 	end
 
 	def process_message(data)
-		h = JSON.parse(data, symbolize_names: true);
-
 		begin
 			h[:color] = h.key?(:color) ? Color.from_s(h[:color]) : nil;
 		rescue
