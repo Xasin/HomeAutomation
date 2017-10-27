@@ -40,8 +40,10 @@ module Hooks
 					@weatherTime = nil;
 
 					begin
-						@wData = $weater.fiveday_data["list"];
+						newWeatherData = $weather.fiveday_data["list"];
 					rescue
+					else
+						@wData = newWeatherData;
 					end
 
 					if @wData
