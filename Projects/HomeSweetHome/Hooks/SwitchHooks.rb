@@ -18,7 +18,7 @@ module Hooks
 			if(newMember != "none" and formerMember == "none") then
 				@switchTTS.speak "Good morning, #{newMember}", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				@switchTTS.speak "Hello, #{newMember}", @SystemColors[newMember], single: true;
+				@switchTTS.speak "Hello #{newMember}", @SystemColors[newMember], single: true;
 			elsif(formerMember != "none") then
 				@switchTTS.speak "Good night, #{formerMember}", @SystemColors[formerMember], single: true;
 			end
@@ -48,6 +48,9 @@ module Hooks
 
 		if(data =~ /sw([nmxs])/) then
 			$mqtt.publish_to "Personal/Xasin/Switching/Who", {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1], retain: true;
+		end
+		if(data == "gn") then
+			$mqtt.publish_to "Personal/Xasin/Switching/Who", "none", retain: true;
 		end
 		end
 	end

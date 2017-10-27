@@ -55,6 +55,8 @@ class Server
 			elsif(data =~ /l([\da-f]{6})/) then
 				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
 				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.from_s("#" + $~[1]).to_s, retain: true;
+			elsif(data == "gn") then
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "off", retain: true;
 			end
 		end
 
