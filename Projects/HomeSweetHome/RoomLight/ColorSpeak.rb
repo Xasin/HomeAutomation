@@ -79,7 +79,7 @@ class Server
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
 
-	def process_message(data)
+	def process_message(h)
 		begin
 			h[:color] = h.key?(:color) ? Color.from_s(h[:color]) : nil;
 		rescue

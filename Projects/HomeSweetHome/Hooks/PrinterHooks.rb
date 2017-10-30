@@ -8,7 +8,7 @@ module Printer
 	status: :idle,
 	lastProgress: 2,
 }
-@printTTS = Messaging::Client.new($mqtt, "Xasin", "Printer");
+@printTTS = Messaging::UserClient.new($mqtt, "Xasin", "Printer");
 
 $mqtt.subscribeTo "octoprint/event/PrintStarted" do
 	@printTTS.speak("Print started.", Color.RGB(0, 255, 200));
