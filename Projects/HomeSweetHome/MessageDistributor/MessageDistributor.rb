@@ -6,14 +6,14 @@ module Messaging
 	class Distributor
 		def initialize(mqtt, name, defaultEndpoint)
 			@mqtt = mqtt;
-			@name = name;
+			@Name = name;
 
 			@messageQueue = Queue.new();
 
 			@endpointList = Array.new();
 			@endpointList << defaultEndpoint;
 
-			@mqtt.subscribe_to "Personal/#{@name}/Notify" do |tList, data|
+			@mqtt.subscribe_to "Personal/#{@Name}/Notify" do |tList, data|
 				begin
 					data = JSON.parse(data, symbolize_names: true);
 					forward_message(data);
