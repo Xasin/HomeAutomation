@@ -19,7 +19,7 @@ module Hooks
 			if(newMember != "none" and formerMember == "none") then
 				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember].to_s, single: true;
+				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember], single: true;
 			elsif(formerMember != "none") then
 				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember], single: true;
 			end

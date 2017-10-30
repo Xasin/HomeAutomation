@@ -83,7 +83,7 @@ module Messaging
 			args ||= Hash.new();
 
 			args[:text] 	= text;
-			args[:color] 	= color if color;
+			args[:color] 	= color.to_s if color;
 
 			notify(args);
 		end
