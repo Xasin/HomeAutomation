@@ -52,7 +52,7 @@ module Hooks
 
 						first = true;
 						@wData.fiveday_data["list"].each do |d|
-							next  if d["dt"].to_i <= Time.now();
+							next  if d["dt"].to_i <= Time.now().to_i;
 							break if d["dt"].to_i >= Time.today(21.hours).to_i;
 							@weatherTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
 							first = false;
