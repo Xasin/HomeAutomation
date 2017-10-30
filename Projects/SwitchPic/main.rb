@@ -9,14 +9,14 @@ set :bind, "0.0.0.0"
 
 $xaQTT = MQTT::SubHandler.new $mqtt_host
 
-$currentMember = Hash.new() do |h, k| $h[k] = "none"; end
+$currentMember = Hash.new() do |h, k| h[k] = "none"; end
 $memberColors = {
 	"Xasin"	=> "red",
 	"Neira"	=> "blue",
-	"Mesh"	=>	"brightgreen",
+	"Mesh"	=> "brightgreen",
 }
 
-$xaQTT.subscribeTo "personal/switching/+/who" do |topic, payload|
+$xaQTT.subscribeTo "Personal/+/Switching/Who" do |topic, payload|
 	unless payload == "none" then
 	sysName = topic[0];
 	$currentMember[sysName] = payload;

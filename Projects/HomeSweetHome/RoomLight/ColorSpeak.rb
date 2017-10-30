@@ -7,9 +7,11 @@ require_relative '../Libs/Waitpoint.rb'
 
 module ColorSpeak
 class Server
-	def initialize(led, mqtt)
+	def initialize(led, mqtt, roomName = "default")
 		@led = led;
 		@mqtt = mqtt;
+
+		@RoomName = roomName;
 
 		@userColor = Color.RGB(0, 0, 0);
 		@speaking = false;
@@ -20,43 +22,42 @@ class Server
 
 		@newMessageWaitpoint = Xasin::Waitpoint.new();
 
-		@mqtt.subscribeTo "Room/TTS/+" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/TTS" do |t, data|
 			h = JSON.parse(data, symbolize_names: true);
+			process_message(h);
+		end
 
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Color" do |t, data|
 			begin
-				h[:color] = h.key?(:color) ? Color.from_s(h[:color]) : nil;
+				data = JSON.parse(data, symbolize_names: true);
 			rescue
-				h[:color] = nil;
+				@userColor = Color.from_s(data);
+				update_current_color();
+			else
+				@userColor = Color.from_s(data[:color]);
+				update_current_color(data[:speed]);
 			end
-			queue_message(t[0], h);
 		end
 
-		@mqtt.subscribeTo "Room/Light/Set/Color" do |t, data|
-			@userColor = Color.from_s(data);
-			update_current_color();
-		end
-
-		@mqtt.subscribeTo "Room/Light/Set/Switch" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Switch" do |t, data|
 			@lightOn = (data == "on")
 			update_current_color();
 		end
 
-		@mqtt.subscribeTo "Room/Commands" do |tList, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
-				@lightOn = not(@lightOn);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", @lightOn ? "off" : "on", retain: true;
 			elsif(data == "ld") then
-				@lightOn = true;
-				@userColor = Color.RGB(0, 0, 0);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.RGB(0,0,0).to_s, retain: true;
 			elsif(data =~ /lh([\d]{1,3})/) then
-				@lightOn = true;
-				@userColor = Color.HSV($~[1].to_i);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.HSV($~[1].to_i).to_s, retain: true;
 			elsif(data =~ /l([\da-f]{6})/) then
-				@lightOn = true;
-				@userColor = Color.from_s("#" + $~[1]);
-				update_current_color();
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.from_s("#" + $~[1]).to_s, retain: true;
+			elsif(data == "gn") then
+				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "off", retain: true;
 			end
 		end
 
@@ -90,9 +91,20 @@ class Server
 		@skipUpdateColor = true;
 		rColor = get_current_color
 
-		@mqtt.publishTo "Room/Light/Color",  rColor.to_s, retain: true, qos: 1;
-		@mqtt.publishTo "Room/Light/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
+		@mqtt.publish_to "Room/#{@RoomName}/Lights/Color",  rColor.to_s, retain: true, qos: 1;
+		@mqtt.publish_to "Room/#{@RoomName}/Lights/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
+	end
+
+	def process_message(data)
+		begin
+			h[:color] = h.key?(:color) ? Color.from_s(h[:color]) : nil;
+		rescue
+			h[:color] = nil;
+		end
+		queue_message(h[:gid] || "default", h);
+
+		return true;
 	end
 
 	def queue_message(id, data)
@@ -111,7 +123,7 @@ class Server
 			v = @speechQueue[k];
 			while h = v.shift
 				next unless h.has_key? :text
-				next if h[:text] =~ /[^\w\s\.,-:+']/;
+				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
 					speechBrightness = [get_recommended_color().get_brightness, 50].max();
@@ -128,21 +140,24 @@ class Server
 end
 
 class Client
-	def initialize(mqtt, topic)
+	def initialize(mqtt, topic, roomName = "default")
 		@mqtt = mqtt;
+
+		@RoomName = roomName;
 
 		@topic = topic;
 	end
 
 	def speak(t, c = nil, single: nil, notoast: false)
 		outData = {
-			text: t
+			text: 	t,
+			gid:	@topic,
 		};
 		outData[:color] 	= c 		if c;
 		outData[:single] 	= true 	if single;
-		outData[:notoast] = true	if notoast;
+		outData[:notoast] 	= true	if notoast;
 
-		@mqtt.publishTo "Room/TTS/#{@topic}", outData.to_json;
+		@mqtt.publishTo "Room/#{@RoomName}/TTS", outData.to_json;
 	end
 end
 end
