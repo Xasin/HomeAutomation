@@ -24,4 +24,10 @@ module Messaging
 	$mqtt.track "Personal/Xasin/IsHome" do |newState|
 		@ttsMEndpoint.available = (newState == "true");
 	end
+
+	$telegram.on_message do |message|
+		if message =~ /\/cmd (.+)/ then
+			$mqtt.publish_to "Room/default/Commands", $1, qos: 2;
+		end
+	end
 end
