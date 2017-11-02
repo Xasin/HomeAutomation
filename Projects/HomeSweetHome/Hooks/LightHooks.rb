@@ -6,7 +6,8 @@ module Hooks
 	module Lights
 		@switchValue = $mqtt.track "Room/default/Lights/Switch"
 
-		@mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
+		@RoomName = "default" 
+		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
 				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", @switchValue.value == "on" ? "off" : "on", retain: true;
 			elsif(data == "ld") then

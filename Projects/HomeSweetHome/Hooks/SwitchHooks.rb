@@ -19,7 +19,7 @@ module Hooks
 			if(newMember != "none" and formerMember == "none") then
 				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
-				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember], single: true;
+				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember].to_s, single: true;
 			elsif(formerMember != "none") then
 				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember], single: true;
 			end
@@ -53,6 +53,12 @@ module Hooks
 		if(data == "gn") then
 			$mqtt.publish_to "Personal/Xasin/Switching/Who", "none", retain: true;
 		end
+		end
+
+		$telegram.on_message do |message|
+			if(message[:text].downcase =~ /(?:switch|switched) .*(xasin|neira|mesh)/) then
+				$mqtt.publish_to "Personal/Xasin/Switching/Who", $1.capitalize, retain: true;
+			end
 		end
 	end
 end
