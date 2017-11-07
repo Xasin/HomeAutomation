@@ -16,6 +16,8 @@ module Hooks
 		@who = $mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
 			formerMember ||= "none";
 
+			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{newMember}"}}' https://hidden-cliffs-30452.herokuapp.com/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2`
+
 			if(newMember != "none" and formerMember == "none") then
 				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
 			elsif(newMember != "none") then
