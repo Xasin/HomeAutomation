@@ -6,7 +6,7 @@ module Hooks
 	module Lights
 		@switchValue = $mqtt.track "Room/default/Lights/Switch"
 
-		@RoomName = "default" 
+		@RoomName = "default"
 		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
 				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", @switchValue.value == "on" ? "off" : "on", retain: true;
@@ -24,7 +24,6 @@ module Hooks
 			end
 		end
 
-		@daylightProfile = {};
 		dayProfile = {
 			1.hours	=> Color.K(1000, 0.2),
 			6.hours 	=> Color.K(1000, 0.2),
@@ -35,6 +34,7 @@ module Hooks
 			20.hours	=> Color.K(3000, 1),
 			24.hours => Color.K(1800, 0.5),
 		};
+		@daylightProfile = dayProfile.clone();
 
 		7.times do |i|
 			Interpolate::mix_looped(@daylightProfile, dayProfile, offset: i.days, upperBound: 7.days, spacing: 0.5.hours);
