@@ -65,9 +65,12 @@ class Server
 
 	def get_recommended_color()
 		if(@daylightCB) then
-			daylightColor = @daylightCB.call
-			return daylightColor if @userColor.black?
-			return daylightColor.set_brightness(@userColor.get_brightness/255.0) if @userColor.white?
+			begin
+				daylightColor = @daylightCB.call
+				return daylightColor if @userColor.black?
+				return daylightColor.set_brightness(@userColor.get_brightness/255.0) if @userColor.white?
+			rescue
+			end
 		end
 		return @userColor;
 	end
