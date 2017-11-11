@@ -24,6 +24,27 @@ module Hooks
 			end
 		end
 
+		@prePS2Color = "#FFFFFF";
+		@PS2Status = false;
+		@roomColor = $mqtt.track "Room/default/Lights/Color"
+
+		Thread.new do
+			loop do
+				sleep 20
+				currentStatus = $planetside.get_online_status("Xasin");
+
+				if(currentStatus and not @PS2Status) then
+					@prePS2Color = @roomColor.value
+					@PS2Status = true;
+
+					$mqtt.publish_to "Room/default/Lights/Set/Color", "#936AFC"
+				elsif(not currentStatus and @PS2Status) then
+					@PS2Status = false;
+					$mqtt.publish_to "Room/default/Lights/Set/Color", @prePS2Color unless @roomColor.value != "#936AFC"
+				end
+			end
+		end
+
 		dayProfile = {
 			1.hours	=> Color.K(1000, 0.2),
 			6.hours 	=> Color.K(1000, 0.2),
