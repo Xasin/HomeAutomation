@@ -43,7 +43,7 @@ module Hooks
 					$mqtt.publish_to "Room/default/Lights/Set/Color", @prePS2Color unless @roomColor.value != "#936AFC"
 				end
 			end
-		end
+		end.abort_on_exception = true;
 
 		dayProfile = {
 			1.hours	=> Color.K(1000, 0.2),
