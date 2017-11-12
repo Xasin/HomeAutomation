@@ -10,7 +10,8 @@ module Welcome
 
 @welcomeTTS = ColorSpeak::Client.new($mqtt, "Welcome");
 
-@switchTrack = $mqtt.track "Personal/Xasin/Switching/Who";
+@switchTrack 	= $mqtt.track "Personal/Xasin/Switching/Who";
+@computerTrack = $mqtt.track "Room/default/X-Desktop/Status"
 
 $mqtt.track "Personal/Xasin/IsHome" do |data|
 	if(data == "true") then
@@ -21,6 +22,8 @@ $mqtt.track "Personal/Xasin/IsHome" do |data|
 			if(Time.today(18.hours) < Time.now()) then
 				$mqtt.publish_to "Room/default/Lights/Set/Switch", "on"
 			end
+
+			`etherwake 54:a0:50:50:d6:ac` if(@computerTrack.value == "SUSPENDED");
 		end
 	end
 end
