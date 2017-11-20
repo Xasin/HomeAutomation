@@ -11,8 +11,8 @@ module Hooks
 		@AlarmThread = Thread.new do
 			while true do
 				Thread.stop() until @alarmTime;
-
 				sleep [0.5, [2.minutes, (@alarmTime - Time.now())*0.9].min].max
+				next unless @alarmTime;
 
 				if(Time.now() >= @alarmTime) then
 					@weatherTime = @alarmTime + 5.minutes;
@@ -74,8 +74,13 @@ module Hooks
 		module_function :set_alarm
 
 		$mqtt.subscribeTo "Room/default/Commands" do |t, data|
-			if(data == "clk" and not @alarmTime) then
-				set_alarm
+			if(data == "clk") then
+				if not @alarmTime then
+					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
+				else
+					@alarmTime = nil;
+					@wakeupTTS.speak "Alarm unset."
+				end
 			end
 		end
 
