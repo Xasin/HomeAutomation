@@ -32,3 +32,11 @@ get "/switchPics/Xasin.jpg" do
 	etag mName
 	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i, :filename => "#{mName}.jpg", :type => :jpg, :disposition => :inline;
 end
+
+post "/gitAPI/ColorSpeakUpdate" do
+	if(params[:repository][:full_name] == "Xasin/HomeAutomation") then
+		begin
+			Process.kill("HUP", `cat /tmp/ColorSpeak.pid`);
+		end
+	end
+end
