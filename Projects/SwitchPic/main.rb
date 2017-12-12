@@ -34,10 +34,9 @@ end
 
 post "/gitAPI/ColorSpeakUpdate" do
 	begin
-		if(params[:repository][:full_name] == "Xasin/HomeAutomation") then
-
+		webhookData = JSON.parse(params["payload"]);
+		if(webhookData["repository"]["full_name"] == "Xasin/HomeAutomation") then
 			Process.kill("HUP", `cat /tmp/ColorSpeak.pid`.to_i);
-
 		end
 	rescue
 	end
