@@ -33,12 +33,10 @@ get "/switchPics/Xasin.jpg" do
 end
 
 post "/gitAPI/ColorSpeakUpdate" do
-	puts "Params: #{params}"
-
 	begin
 		if(params[:repository][:full_name] == "Xasin/HomeAutomation") then
 
-			Process.kill("HUP", `cat /tmp/ColorSpeak.pid`);
+			Process.kill("HUP", `cat /tmp/ColorSpeak.pid`.to_i);
 
 		end
 	rescue
