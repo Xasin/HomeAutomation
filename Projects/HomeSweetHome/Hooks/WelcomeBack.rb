@@ -2,9 +2,9 @@ module Hooks
 module Welcome
 
 @SystemColors = {
-	"Xasin" => Color.RGB(255, 0, 0),
-	"Neira" => Color.RGB(0, 0, 255),
-	"Mesh"  => Color.RGB(0, 255, 0),
+	"Xasin" => Color.RGB(255, 50, 50),
+	"Neira" => Color.RGB(50, 50, 255),
+	"Mesh"  => Color.RGB(50, 255, 50),
 }
 
 
@@ -19,7 +19,7 @@ $mqtt.track "Personal/Xasin/IsHome" do |data|
 			who = @switchTrack.value;
 
 			@welcomeTTS.speak "Welcome back home #{who}", @SystemColors[who];
-			if(Time.today(18.hours) < Time.now()) then
+			if(Time.today(16.5.hours) < Time.now()) then
 				$mqtt.publish_to "Room/default/Lights/Set/Switch", "on"
 			end
 

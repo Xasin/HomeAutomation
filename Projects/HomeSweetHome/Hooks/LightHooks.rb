@@ -61,7 +61,7 @@ module Hooks
 			Interpolate::mix_looped(@daylightProfile, dayProfile, offset: i.days, upperBound: 7.days, spacing: 0.5.hours);
 		end
 
-		$wakeupTimes = [7.5.hours, 7.hours, 7.hours, 7.5.hours, 7.5.hours, 9.5.hours, 9.5.hours];
+		$wakeupTimes = [7.hours, 6.75.hours, 6.75.hours, 6.75.hours, 6.75.hours, 9.5.hours, 9.5.hours];
 		wakeupProfile = {
 			-1.minutes => Color.K(1800, 0.1),
 			15.minutes => Color.K(4000, 1),
@@ -70,7 +70,7 @@ module Hooks
 			Interpolate::mix_looped(@daylightProfile, wakeupProfile, offset: i.days + $wakeupTimes[i], upperBound: 7.days, spacing: 0.5.hours);
 		end
 
-		workoutTimes = [18.hours, 17.15.hours, 20.hours, 18.hours, 18.hours, 18.hours, 18.hours];
+		workoutTimes = [18.hours, 13.hours, 17.3.hours, 18.hours, 18.hours, 18.hours, 18.hours];
 		workoutProfile = {
 			0 				=> Color.K(6000, 1),
 			18.minutes	=> Color.K(6000, 1),
@@ -79,13 +79,15 @@ module Hooks
 			Interpolate::mix_looped(@daylightProfile, workoutProfile, offset: i.days + workoutTimes[i], upperBound: 7.days, spacing: 15.minutes);
 		end
 
-		teaTimes = [15.hours, 16.45.hours, 16.45.hours, 17.hours, 17.hours, 17.hours, 17.hours];
+		teaTimes = [15.hours, nil, 16.45.hours, nil, nil, 17.hours, 17.hours];
 		teaProfile = {
 			-3.minutes 	=> Color.K(2400, 0.7),
 			20.minutes 	=> Color.K(2400, 0.7),
 		}
 		7.times do |i|
-			Interpolate::mix_looped(@daylightProfile, teaProfile, offset: i.days + teaTimes[i], upperBound: 7.days, spacing: 10.minutes);
+			if teaTimes[i] then
+				Interpolate::mix_looped(@daylightProfile, teaProfile, offset: i.days + teaTimes[i], upperBound: 7.days, spacing: 10.minutes);
+			end
 		end
 
 		@daylightInterpolator = Interpolate::Points.new(@daylightProfile);
