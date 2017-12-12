@@ -1,13 +1,12 @@
+require_relative "credentials.rb"
 
 require_relative 'MQTTSubscriber'
-require 'sinatra'
+$xaQTT = MQTT::SubHandler.new $mqtt_host
 
-require_relative "credentials.rb"
+require 'sinatra'
 
 set :port, 80
 set :bind, "0.0.0.0"
-
-$xaQTT = MQTT::SubHandler.new $mqtt_host
 
 $currentMember = Hash.new() do |h, k| h[k] = "none"; end
 $memberColors = {
