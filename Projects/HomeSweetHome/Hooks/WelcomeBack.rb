@@ -19,7 +19,7 @@ $mqtt.track "Personal/Xasin/IsHome" do |data|
 			who = @switchTrack.value;
 
 			@welcomeTTS.speak "Welcome back home #{who}", @SystemColors[who];
-			if(Time.today(16.5.hours) < Time.now()) then
+			if(Time.today($lightsOnTime) < Time.now()) then
 				$mqtt.publish_to "Room/default/Lights/Set/Switch", "on"
 			end
 

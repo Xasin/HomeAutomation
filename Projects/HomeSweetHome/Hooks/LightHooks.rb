@@ -4,7 +4,10 @@ require_relative '../Libs/InterpolateTools.rb'
 
 module Hooks
 	module Lights
+		$lightsOnTime = 16.hours
+
 		@switchValue = $mqtt.track "Room/default/Lights/Switch"
+		@xasinHome = $mqtt.track "Personal/Xasin/IsHome"
 
 		@RoomName = "default"
 		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
@@ -27,7 +30,6 @@ module Hooks
 		@prePS2Color = "#FFFFFF";
 		@PS2Status = false;
 		@roomColor = $mqtt.track "Room/default/Lights/Color"
-
 		Thread.new do
 			loop do
 				sleep 20
@@ -41,6 +43,10 @@ module Hooks
 				elsif(not currentStatus and @PS2Status) then
 					@PS2Status = false;
 					$mqtt.publish_to "Room/default/Lights/Set/Color", @prePS2Color unless @roomColor.value != "#936AFC"
+				end
+
+				if (Time.today($lightsOnTime).between? Time.now() - 20, Time.now()) and @xasinHome.value == "true"
+					$mqtt.publish_to "Room/default/Lights/Set/Switch", "on"
 				end
 			end
 		end.abort_on_exception = true;
