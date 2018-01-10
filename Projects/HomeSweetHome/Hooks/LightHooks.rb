@@ -10,20 +10,50 @@ module Hooks
 		@xasinHome = $mqtt.track "Personal/Xasin/IsHome"
 
 		@RoomName = "default"
+
+		def self.switch(state)
+			$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", state, retain: true;
+		end
+		def self.color(c)
+			$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", c.to_s, retain: true;
+		end
+
 		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", @switchValue.value == "on" ? "off" : "on", retain: true;
+				switch @switch.value == "on" ? "off" : "on";
 			elsif(data == "ld") then
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.RGB(0,0,0).to_s, retain: true;
+				switch "on"
+				color "#000000"
 			elsif(data =~ /lh([\d]{1,3})/) then
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.HSV($~[1].to_i).to_s, retain: true;
+				switch "on"
+				color  Color.HSV($~[1].to_i)
 			elsif(data =~ /l([\da-f]{6})/) then
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "on", retain: true;
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", Color.from_s("#" + $~[1]).to_s, retain: true;
+				switch "on"
+				color Color.from_s("#" + $~[1])
 			elsif(data == "gn") then
-				$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", "off", retain: true;
+				switch "off"
+			end
+		end
+
+		$telegram.on_message do |data|
+			mText = data[:text].downcase;
+
+			case mText
+			when /lights\s(on|off)/
+				switch $~[1]
+			when /daylight(?:[^\d]*(\d{1,3})%|)/
+				switch "on"
+				if($~[1]) then
+					color Color.RGB(255,255,255).set_brightness($~[1].to_i * 25.5);
+				else
+					color "#000000"
+				end
+			when /lights .*#([\da-f]{6})/, /lights .*to .*([\da-f]{6})[^k]/
+				switch "on"
+				color Color.from_s("#" + $~[1])
+			when /lights .*(\d{4,})k(?:[^\d]*(\d{1,3})%|)/
+				switch "on"
+				color Color.temperature($~[1].to_i, $~[2] ? $~[2].to_f/100 : 1);
 			end
 		end
 
