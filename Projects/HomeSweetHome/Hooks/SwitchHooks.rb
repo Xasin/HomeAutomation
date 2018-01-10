@@ -22,11 +22,11 @@ module Hooks
 			end
 
 			if(newMember != "none" and formerMember == "none") then
-				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
+				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember];
 			elsif(newMember != "none") then
-				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember].to_s, single: true;
+				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember];
 			elsif(formerMember != "none") then
-				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember], single: true;
+				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember];
 			end
 		end
 
@@ -61,7 +61,8 @@ module Hooks
 		end
 
 		$telegram.on_message do |message|
-			if(message[:text].downcase =~ /(?:switch|switched) .*(xasin|neira|mesh)/) then
+			mText = message[:text].downcase;
+			if(mText =~ /(?:switch|switched)/ and mText =~ /(xasin|neira|mesh)/) then
 				$mqtt.publish_to "Personal/Xasin/Switching/Who", $1.capitalize, retain: true;
 			end
 		end
