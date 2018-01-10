@@ -25,6 +25,9 @@ $mqtt.track "Personal/Xasin/IsHome" do |data|
 
 			`etherwake 54:a0:50:50:d6:ac` if(@computerTrack.value == "SUSPENDED");
 		end
+	else
+		$telegram.send_message("See you around!", disable_notification: true);
+		$mqtt.publish_to "Room/default/Lights/Set/Switch", "off"
 	end
 end
 
