@@ -29,7 +29,8 @@ module Hooks
 					@wakeupTTS.speak "Good morning, David."
 				end
 			end
-		end.abort_on_exception = true;
+		end
+		@AlarmThread.abort_on_exception = true;
 
 		@weatherTime = nil;
 		@WeatherThread = Thread.new do
@@ -82,7 +83,8 @@ module Hooks
 				lowestSwitch = @switchPercentTrack.min;
 				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switchting::SystemColors[lowestSwitch[0]];
 			end
-		end.abort_on_exception = true;
+		end
+		@SwitchRecommendThread.abort_on_exception = true;
 
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
