@@ -30,7 +30,6 @@ module Hooks
 				end
 			end
 		end
-		@AlarmThread.abort_on_exception = true;
 
 		@weatherTime = nil;
 		@WeatherThread = Thread.new do
@@ -81,10 +80,9 @@ module Hooks
 
 				@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
 				lowestSwitch = @switchPercentTrack.min;
-				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switchting::SystemColors[lowestSwitch[0]];
+				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switching::SystemColors[lowestSwitch[0]];
 			end
 		end
-		@SwitchRecommendThread.abort_on_exception = true;
 
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
