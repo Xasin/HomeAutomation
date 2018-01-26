@@ -78,7 +78,7 @@ module Hooks
 
 				@switchRecommendTime = nil;
 
-				@switchPercentTrack.delete_if {|key| not Switching::SystemColors.include? key }
+				@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
 				lowestSwitch = @switchPercentTrack.min;
 				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switchting::SystemColors[lowestSwitch[0]];
 			end
