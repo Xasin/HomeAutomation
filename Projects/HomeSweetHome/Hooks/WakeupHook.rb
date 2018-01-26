@@ -29,7 +29,7 @@ module Hooks
 					@wakeupTTS.speak "Good morning, David."
 				end
 			end
-		end
+		end.abort_on_exception = true;
 
 		@weatherTime = nil;
 		@WeatherThread = Thread.new do
