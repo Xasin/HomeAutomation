@@ -9,6 +9,7 @@ module Hooks
 			"Neira" => Color.RGB(0, 0, 255),
 			"Mesh"  => Color.RGB(0, 255, 0)
 		}
+		SystemColors = @SystemColors;
 
 		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
 		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
