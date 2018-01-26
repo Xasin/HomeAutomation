@@ -82,7 +82,7 @@ module Hooks
 				lowestSwitch = @switchPercentTrack.min;
 				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switchting::SystemColors[lowestSwitch[0]];
 			end
-		end
+		end.abort_on_exception = true;
 
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
