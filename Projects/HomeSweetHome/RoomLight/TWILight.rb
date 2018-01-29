@@ -1,9 +1,9 @@
 require 'i2c'
 require_relative '../Libs/ColorUtils.rb'
 
-class RGB 
-	def initialize()
-		@twi = I2C.create("/dev/i2c-1");
+class RGB
+	def initialize(twiClass)
+		@twi ||= I2C.create("/dev/i2c-1");
 		@conAttempts = 0;
 	end
 
