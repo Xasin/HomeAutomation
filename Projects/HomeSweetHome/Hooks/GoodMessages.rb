@@ -18,8 +18,7 @@ module Hooks
 				sleep [1.minutes, (@nextMessage - Time.now()).to_i].max until @nextMessage < Time.now();
 				@nextMessage = Time.now() + rand(45..120).minutes;
 
-				next unless (Time.now().hour).between(9..23);
-
+				next unless (Time.now().hour).between?(9,23);
 				@messageClient.speak @messages.sample, Color.RGB(150, 255, 150);
 			end
 		end
