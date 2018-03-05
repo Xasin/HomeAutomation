@@ -56,7 +56,7 @@ module Hooks
 		@humidityWarned = false;
 		@lastNotified = Time.new(0);
 
-		@humidSensor = SI5021.new($twi);
+		@humidSensor = SI7021.new($twi);
 		Thread.new do
 			loop do
 				sleep 30;
