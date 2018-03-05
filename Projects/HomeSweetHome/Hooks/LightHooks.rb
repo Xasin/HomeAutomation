@@ -20,7 +20,7 @@ module Hooks
 
 		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
 			if(data == "e") then
-				switch @switch.value == "on" ? "off" : "on";
+				switch @switchValue.value == "on" ? "off" : "on";
 			elsif(data == "ld") then
 				switch "on"
 				color "#000000"
