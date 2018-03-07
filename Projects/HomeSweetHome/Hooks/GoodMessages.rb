@@ -10,6 +10,11 @@ module Hooks
 			"I hope you're feeling good, because ... Well, you should!",
 			"If your plans aren't working out ... That's ok. You have all the time you need - you can work on them later :)",
 			"I hope you're enjoying what you are doing - you deserve to :)",
+			"Remember that the passion to do something does not come from willpower alone. Breed it, let it go by feeling confident, feeling good about yourself - then your passions will soon after follow <3",
+			"When you feel like you *need* to do something ... Remember, you have time.
+			 The most important thing is you, first and foremost, and ... Let projects come naturally, when you enjoy them.",
+			"Do you want to switch to something different, try something out? If you feel like it, maybe now's a good time to do so!
+			 But remember, there is no need to rush or feel obligated :)"
 		]
 
 		@nextMessage = Time.now();
