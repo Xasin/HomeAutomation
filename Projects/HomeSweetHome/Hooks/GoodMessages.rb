@@ -10,6 +10,7 @@ module Hooks
 			"I hope you're feeling good, because ... Well, you should!",
 			"If your plans aren't working out ... That's ok. You have all the time you need - you can work on them later :)",
 			"I hope you're enjoying what you are doing - you deserve to :)",
+			"You're awesome and you should relax!",
 		]
 
 		@nextMessage = Time.now();
