@@ -14,14 +14,15 @@ module Hooks
 			"When you feel like you *need* to do something ... Remember, you have time.
 			 The most important thing is you, first and foremost, and ... Let projects come naturally, when you enjoy them.",
 			"Do you want to switch to something different, try something out? If you feel like it, maybe now's a good time to do so!
-			 But remember, there is no need to rush or feel obligated :)"
+			 But remember, there is no need to rush or feel obligated :)",
+			"Don't forget to balance out your productivity with some lighthearted relaxing!",
 		]
 
 		@nextMessage = Time.now();
 		Thread.new do
 			loop do
 				sleep [1.minutes, (@nextMessage - Time.now()).to_i].max until @nextMessage < Time.now();
-				@nextMessage = Time.now() + rand(45..120).minutes;
+				@nextMessage = Time.now() + rand(60..120).minutes;
 
 				next unless (Time.now().hour).between?(9,23);
 				@messageClient.speak @messages.sample, Color.RGB(150, 255, 150);
