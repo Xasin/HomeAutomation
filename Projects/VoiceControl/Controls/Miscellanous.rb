@@ -4,6 +4,16 @@ sentence /(red|green|blue) switched in/ do |match|
 end
 
 sentence "computer good night and sweet dreams" do
-	$xasin.switch = "none";
-	$room.lights  = false;
+	$mqtt.publish_to "Room/default/Commands", "gn"
+end
+
+sentence "computer i am back home" do
+	$xasin.home = true;
+end
+sentence "computer i am leaving now" do
+	$xasin.home = false;
+end
+
+sentence "computer how are you doing" do
+	$xasin.notify "I am doing quite well, thank you for asking."
 end
