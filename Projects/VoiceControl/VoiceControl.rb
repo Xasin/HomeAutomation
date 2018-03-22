@@ -13,8 +13,7 @@ module VoiceControl
 
 		def process(words)
 			#next unless user.home? and user.awake?
-			puts "Got words: #{words}"
-
+			
 			if (words == "computer enable voice control") and (not @listeningEnabled) then
 				@listeningEnabled = true;
 				@user.notify "Voice control on"
