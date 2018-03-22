@@ -2,18 +2,20 @@
 grammar MainControl;
 
 <commands> = <lights>;
-<quickCommands> = i am back home | how are you doing | (red | green | blue) switched in;
+<quickCommands> = i am back home | how are you doing | (red | green | blue) switched in |
+	good night and sweet dreams | (enable | disable) voice control;
 
 
-<lights> = turn (on|off) the lights | light temperature to <numberSequence> |
-	light color to [<percentage> red] [<percentage> green] [<percentage> blue];
+<lights> = turn (on|off) the light | light temperature to <numberSequence> [brightness <percentage>]|
+	light color to [<percentage> red] [<percentage> green] [<percentage> blue] |
+	light to daylight;
 
 
 public <commandSequence> = computer (<commands> please | <quickCommands>);
 
 <numberSequence> = <numberSegment> [<numberModifier> <numberSegment>]* [<numberModifier>];
 
-<numberModifier> = thousand | million | billion;
+<numberModifier> = micro | milli | thousand | million | billion;
 <percentage> 	 = (one hundred | <numberTens> [<numberOnes>] | <numberOnes>) percent;
 <numberSegment> = (<numberOnes> hundred [and] [<numberTens>] [<numberOnes>]) | <numberTens> [<numberOnes>] | <numberOnes>;
 <numberOnes> 	 = one | two | three | four | five | six | seven | eight | nine;
