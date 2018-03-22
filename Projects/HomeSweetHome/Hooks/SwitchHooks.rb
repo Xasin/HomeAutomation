@@ -9,6 +9,7 @@ module Hooks
 			"Neira" => Color.RGB(0, 0, 255),
 			"Mesh"  => Color.RGB(0, 255, 0)
 		}
+		SystemColors = @SystemColors;
 
 		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
 		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
@@ -16,12 +17,17 @@ module Hooks
 		@who = $mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
 			formerMember ||= "none";
 
+			begin
+			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{newMember}"}}' https://hidden-cliffs-30452.herokuapp.com/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
+			rescue
+			end
+
 			if(newMember != "none" and formerMember == "none") then
-				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember], single: true;
+				@switchMSG.speak "Good morning, #{newMember}.", @SystemColors[newMember];
 			elsif(newMember != "none") then
-				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember].to_s, single: true;
+				@switchMSG.speak "Hello #{newMember}!", @SystemColors[newMember];
 			elsif(formerMember != "none") then
-				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember], single: true;
+				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember];
 			end
 		end
 
@@ -56,7 +62,8 @@ module Hooks
 		end
 
 		$telegram.on_message do |message|
-			if(message[:text].downcase =~ /(?:switch|switched) .*(xasin|neira|mesh)/) then
+			mText = message[:text].downcase;
+			if(mText =~ /(?:switch|switched)/ and mText =~ /(xasin|neira|mesh)/) then
 				$mqtt.publish_to "Personal/Xasin/Switching/Who", $1.capitalize, retain: true;
 			end
 		end

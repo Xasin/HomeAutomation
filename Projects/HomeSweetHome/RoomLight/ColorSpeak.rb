@@ -59,9 +59,19 @@ class Server
 		end.abort_on_exception = true;
 	end
 
+	def daylight_getter(&daylightCB)
+		@daylightCB = daylightCB;
+	end
+
 	def get_recommended_color()
-		return Color.daylight if @userColor.black?
-		return Color.daylight(@userColor.get_brightness/255.0) if @userColor.white?
+		if(@daylightCB) then
+			begin
+				daylightColor = @daylightCB.call
+				return daylightColor if @userColor.black?
+				return daylightColor.set_brightness(@userColor.get_brightness/255.0) if @userColor.white?
+			rescue
+			end
+		end
 		return @userColor;
 	end
 
@@ -72,9 +82,9 @@ class Server
 
 	def update_current_color(fadeSpeed = 3)
 		@skipUpdateColor = true;
-		rColor = get_current_color
+		rColor = get_current_color();
 
-		@mqtt.publish_to "Room/#{@RoomName}/Lights/Color",  rColor.to_s, retain: true, qos: 1;
+		@mqtt.publish_to "Room/#{@RoomName}/Lights/Color",  @userColor.to_s, retain: true, qos: 1;
 		@mqtt.publish_to "Room/#{@RoomName}/Lights/Switch", @lightOn ? "on" : "off", retain: true, qos: 1;
 		@led.sendRGB(rColor, fadeSpeed) unless @speaking;
 	end
@@ -109,7 +119,7 @@ class Server
 				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
-					speechBrightness = [get_recommended_color().get_brightness, 20].max();
+					speechBrightness = [get_recommended_color().get_brightness, 10].max();
 					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
 					system('espeak -s 140 -g 3 -a 200 "' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
 				@speaking = false;

@@ -1,13 +1,12 @@
+require_relative "credentials.rb"
 
 require_relative 'MQTTSubscriber'
-require 'sinatra'
+$xaQTT = MQTT::SubHandler.new $mqtt_host
 
-require_relative "credentials.rb"
+require 'sinatra'
 
 set :port, 80
 set :bind, "0.0.0.0"
-
-$xaQTT = MQTT::SubHandler.new $mqtt_host
 
 $currentMember = Hash.new() do |h, k| h[k] = "none"; end
 $memberColors = {
@@ -31,4 +30,16 @@ get "/switchPics/Xasin.jpg" do
 	mName = $currentMember["Xasin"];
 	etag mName
 	send_file "Pics/#{mName}.jpg", :last_modified=>Time.now().to_i, :filename => "#{mName}.jpg", :type => :jpg, :disposition => :inline;
+end
+
+post "/gitAPI/ColorSpeakUpdate" do
+	begin
+		webhookData = JSON.parse(params["payload"]);
+		if((webhookData["repository"]["full_name"] == "Xasin/HomeAutomation") and (webhookData["ref"] == "refs/heads/master")) then
+			Process.kill("HUP", `cat /tmp/ColorSpeak.pid`.to_i);
+		end
+	rescue
+	end
+
+	true
 end

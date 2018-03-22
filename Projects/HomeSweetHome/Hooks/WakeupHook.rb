@@ -5,18 +5,20 @@ module Hooks
 	module Wakeup
 
 		@wakeupTTS  = ColorSpeak::Client.new($mqtt, "Wakeup");
-		@weatherTTS = ColorSpeak::Client.new($mqtt, "Weather");
 
 		@alarmTime = nil;
 		@AlarmThread = Thread.new do
 			while true do
 				Thread.stop() until @alarmTime;
-
 				sleep [0.5, [2.minutes, (@alarmTime - Time.now())*0.9].min].max
+				next unless @alarmTime;
 
 				if(Time.now() >= @alarmTime) then
 					@weatherTime = @alarmTime + 5.minutes;
 					@WeatherThread.run();
+
+					@switchRecommendTime = @alarmTime + 1.minutes;
+					@SwitchRecommendThread.run();
 
 					@alarmTime = nil;
 
@@ -47,20 +49,38 @@ module Hooks
 					end
 
 					if @wData
-						@weatherTTS.speak "And now, the weather report: "
+						@wakeupTTS.speak "And now, the weather report: "
 						sleep 3;
 
 						first = true;
-						@wData.fiveday_data["list"].each do |d|
+						@wData.each do |d|
 							next  if d["dt"].to_i <= Time.now().to_i;
 							break if d["dt"].to_i >= Time.today(21.hours).to_i;
-							@weatherTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
+							@wakeupTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first), Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5);
 							first = false;
 						end
 					else
-						@weatherTTS.speak "Weather forecast currently unavailable."
+						@wakeupTTS.speak "Weather forecast currently unavailable."
 					end
 				end
+			end
+		end
+
+		@switchRecommendTime = nil;
+		$mqtt.track "Personal/Xasin/Switching/Data" do |newData|
+			@switchPercentTrack = JSON.parse(newData)["percentage"];
+		end
+		@SwitchRecommendThread = Thread.new do
+			loop do
+				Thread.stop() until @switchRecommendTime;
+				sleep [0.5, (@switchRecommendTime - Time.now()).to_i].max
+				next unless Time.now() >= @switchRecommendTime;
+
+				@switchRecommendTime = nil;
+
+				@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
+				lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
+				@wakeupTTS.speak "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switching::SystemColors[lowestSwitch[0]];
 			end
 		end
 
@@ -74,8 +94,13 @@ module Hooks
 		module_function :set_alarm
 
 		$mqtt.subscribeTo "Room/default/Commands" do |t, data|
-			if(data == "clk" and not @alarmTime) then
-				set_alarm
+			if(data == "clk") then
+				if not @alarmTime then
+					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
+				else
+					@alarmTime = nil;
+					@wakeupTTS.speak "Alarm unset."
+				end
 			end
 		end
 
