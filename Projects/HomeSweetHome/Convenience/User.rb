@@ -25,6 +25,9 @@ module Convenience
 		def home?
 			return @homeTrack.value == "true";
 		end
+		def home=(value)
+			@mqtt.publish_to "Personal/#{@name}/IsHome", value ? "true" : "false", retain: true;
+		end
 
 		def switch
 			return @switchTrack.value;
