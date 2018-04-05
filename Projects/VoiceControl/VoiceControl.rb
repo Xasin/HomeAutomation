@@ -1,10 +1,9 @@
 
 module VoiceControl
 	class Processor
-		def initialize(mqtt, user, room)
+		def initialize(mqtt, user)
 			@mqtt = mqtt;
 			@user = user;
-			@room = room;
 
 			@listeningEnabled = true;
 
@@ -12,7 +11,7 @@ module VoiceControl
 		end
 
 		def process(words)
-			#next unless user.home? and user.awake?
+			next unless user.home? and user.awake?
 
 			if (words == "computer enable voice control please") and (not @listeningEnabled) then
 				@listeningEnabled = true;

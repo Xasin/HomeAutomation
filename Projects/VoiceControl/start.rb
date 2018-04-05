@@ -19,7 +19,7 @@ rec = Pocketsphinx::LiveSpeechRecognizer.new(cfg);
 $xasin = Convenience::User.new($mqtt, "Xasin");
 $room  = Convenience::Room.new($mqtt, "default");
 
-$processor = VoiceControl::Processor.new($mqtt, $xasin, $room);
+$processor = VoiceControl::Processor.new($mqtt, $xasin);
 
 require_relative 'VoyagerSounds.rb'
 $player = StarTrek::VojagerSounds.new();
