@@ -3,7 +3,7 @@ grammar MainControl;
 
 <commands> = <lights>;
 <quickCommands> = i am back home | i am leaving now | how are you doing | (red | green | blue) switched in |
-	good night and sweet dreams | (enable | disable) voice control;
+	good night and sweet dreams | (enable | disable) voice control please | (red | blue | stand down) alert;
 
 
 <lights> = turn (on|off) the light | light temperature to <numberSequence> [brightness <percentage>]|

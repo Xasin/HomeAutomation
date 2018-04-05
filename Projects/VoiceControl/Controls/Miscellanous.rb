@@ -17,3 +17,7 @@ end
 sentence "computer how are you doing" do
 	$xasin.notify "I am doing quite well, thank you for asking."
 end
+
+sentence /(red|blue|stand down) alert/ do |match|
+	$player.alert = match[1];
+end
