@@ -4,7 +4,7 @@ sentence /turn (on|off) the light/ do |match|
 	$room.lights = (match[1] == "on");
 end
 
-sentence /light temperature to (\d+)(?: brightness (0\.\d+))/ do |match|
+sentence /light temperature to (\d+)(?: brightness (0\.\d+))?/ do |match|
 	$xasin.notify "Light temperature set to #{match[1]}K"
 	b = 1;
 	if match[2] then
