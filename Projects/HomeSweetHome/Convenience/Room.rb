@@ -14,5 +14,9 @@ module Convenience
 				@mqtt.publish_to "Room/#{@name}/Lights/Set/Switch", "off", retain: true;
 			end
 		end
+
+		def command(cmd)
+			@mqtt.publish_to "Room/#{@name}/Commands", cmd
+		end
 	end
 end

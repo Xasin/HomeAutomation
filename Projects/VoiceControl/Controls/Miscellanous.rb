@@ -4,7 +4,7 @@ sentence /(red|green|blue) switched in/ do |match|
 end
 
 sentence "computer good night and sweet dreams" do
-	$mqtt.publish_to "Room/default/Commands", "gn"
+	$room.command "gn"
 end
 
 sentence "computer i am back home" do
