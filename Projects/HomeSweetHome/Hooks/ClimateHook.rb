@@ -42,15 +42,6 @@ module Hooks
 			end
 		end
 
-		@systemHome = false;
-		$mqtt.track "Personal/Xasin/IsHome" do |data|
-			@systemHome = data == "true";
-		end
-		@systemAsleep = true;
-		$mqtt.track "Personal/Xasin/Switching/Who" do |data|
-			@systemAsleep = data == "none";
-		end
-
 		@HumidityTTS = ColorSpeak::Client.new($mqtt, "HumidityWarning");
 
 		@humidityWarned = false;
@@ -63,8 +54,7 @@ module Hooks
 				$mqtt.publish_to "Room/default/Sensors/Temperature", @humidSensor.temperature;
 				$mqtt.publish_to "Room/default/Sensors/Humidity", @humidSensor.humidity;
 
-				next if @systemAsleep;
-				next unless @systemHome;
+				next unless $xasin.awake? and $xasin.home?
 
 				if case @humidSensor.humidity
 						when 53..58
