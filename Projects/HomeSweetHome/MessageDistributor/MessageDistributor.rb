@@ -13,7 +13,7 @@ module Messaging
 			@endpointList = Array.new();
 			@endpointList << defaultEndpoint;
 
-			@mqtt.subscribe_to "Personal/#{@Name}/Notify" do |tList, data|
+			@mqtt.subscribe_to "Personal/#{@Name}/Notify" do |data|
 				begin
 					data = JSON.parse(data, symbolize_names: true);
 					forward_message(data);
