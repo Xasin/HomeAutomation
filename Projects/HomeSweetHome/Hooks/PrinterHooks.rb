@@ -10,13 +10,13 @@ module Printer
 }
 @printTTS = Messaging::UserClient.new($mqtt, "Xasin", "Printer");
 
-$mqtt.subscribeTo "octoprint/event/PrintStarted" do
+$mqtt.subscribe_to "octoprint/event/PrintStarted" do
 	@printTTS.speak("Print started.", Color.RGB(0, 255, 200));
 	@printerData[:status] = :bed_check;
 	@printerData[:lastProgress] = 0;
 end
 
-$mqtt.subscribeTo "octoprint/progress/printing" do |topic, data|
+$mqtt.subscribe_to "octoprint/progress/printing" do |data|
 	printProgress = JSON.parse data
 
 	if (printProgress["progress"] >= 98) and (@printerData[:status] == :printing)
@@ -27,7 +27,7 @@ $mqtt.subscribeTo "octoprint/progress/printing" do |topic, data|
 	@printerData[:lastProgress] = printProgress["progress"];
 end
 
-$mqtt.subscribeTo "octoprint/temperature/+" do |tool, data|
+$mqtt.subscribe_to "octoprint/temperature/+" do |data, tool|
 	tool = tool[0];
 	data = JSON.parse(data);
 
@@ -48,7 +48,7 @@ $mqtt.subscribeTo "octoprint/temperature/+" do |tool, data|
 			else
 				@printerData[:status] = :bed_heatup;
 			end
-		elsif @printerData[:status] == :bed_heatup and tDiff < 1
+		elsif @printerData[:status] == :bed_heatup and tDiff < 2
 			@printTTS.speak "The heatbed has reached temperature!", Color.RGB(255, 0, 50);
 			@printerData[:status] = :tool0_check;
 		end
@@ -66,7 +66,7 @@ $mqtt.subscribeTo "octoprint/temperature/+" do |tool, data|
 	end
 end
 
-$mqtt.subscribeTo "octoprint/event/MetadataAnalysisFinished" do |topic, data|
+$mqtt.subscribe_to "octoprint/event/MetadataAnalysisFinished" do |data|
 	data 	= JSON.parse(data);
 	pTime = data["result"]["estimatedPrintTime"].to_f
 
