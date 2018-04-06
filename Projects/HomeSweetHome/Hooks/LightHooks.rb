@@ -6,32 +6,17 @@ module Hooks
 	module Lights
 		$lightsOnTime = 16.hours
 
-		@switchValue = $mqtt.track "Room/default/Lights/Switch"
-		@xasinHome = $mqtt.track "Personal/Xasin/IsHome"
-
-		@RoomName = "default"
-
-		def self.switch(state)
-			$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Switch", state, retain: true;
-		end
-		def self.color(c)
-			$mqtt.publish_to "Room/#{@RoomName}/Lights/Set/Color", c.to_s, retain: true;
-		end
-
-		$mqtt.subscribe_to "Room/#{@RoomName}/Commands" do |tList, data|
+		$room.on_command do |data|
 			if(data == "e") then
-				switch @switchValue.value == "on" ? "off" : "on";
+				$room.lights = (not $room.lightSwitch);
 			elsif(data == "ld") then
-				switch "on"
-				color "#000000"
+				$room.lights = "#000000"
 			elsif(data =~ /lh([\d]{1,3})/) then
-				switch "on"
-				color  Color.HSV($~[1].to_i)
+				$room.lights = Color.HSV($~[1].to_i)
 			elsif(data =~ /l([\da-f]{6})/) then
-				switch "on"
-				color Color.from_s("#" + $~[1])
+				$room.lights = Color.from_s("#" + $~[1])
 			elsif(data == "gn") then
-				switch "off"
+				$room.lights = false;
 			end
 		end
 
@@ -40,43 +25,42 @@ module Hooks
 
 			case mText
 			when /lights\s(on|off)/
-				switch $~[1]
+				$room.lights = ($~[1] == "on");
 			when /daylight(?:[^\d]*(\d{1,3})%|)/
-				switch "on"
 				if($~[1]) then
-					color Color.RGB(255,255,255).set_brightness($~[1].to_i * 25.5);
+					$room.lights = Color.RGB(255,255,255).set_brightness($~[1].to_i * 25.5);
 				else
-					color "#000000"
+					$room.lights = "#000000"
 				end
 			when /lights .*#([\da-f]{6})/, /lights .*to .*([\da-f]{6})[^k]/
-				switch "on"
-				color Color.from_s("#" + $~[1])
+				$room.lights = Color.from_s("#" + $~[1])
 			when /lights .*(\d{4,})k(?:[^\d]*(\d{1,3})%|)/
-				switch "on"
-				color Color.temperature($~[1].to_i, $~[2] ? $~[2].to_f/100 : 1);
+				$room.lights = Color.temperature($~[1].to_i, $~[2] ? $~[2].to_f/100 : 1);
 			end
 		end
 
 		@prePS2Color = "#FFFFFF";
 		@PS2Status = false;
-		@roomColor = $mqtt.track "Room/default/Lights/Color"
 		Thread.new do
 			loop do
 				sleep 20
-				currentStatus = $planetside.get_online_status("Xasin");
+				next unless $xasin.home?
 
-				if(currentStatus and not @PS2Status) then
-					@prePS2Color = @roomColor.value
-					@PS2Status = true;
-
-					$mqtt.publish_to "Room/default/Lights/Set/Color", "#936AFC"
-				elsif(not currentStatus and @PS2Status) then
-					@PS2Status = false;
-					$mqtt.publish_to "Room/default/Lights/Set/Color", @prePS2Color unless @roomColor.value != "#936AFC"
+				if (Time.today($lightsOnTime).between? Time.now() - 20, Time.now())
+					$room.lights = true;
 				end
 
-				if (Time.today($lightsOnTime).between? Time.now() - 20, Time.now()) and @xasinHome.value == "true"
-					$mqtt.publish_to "Room/default/Lights/Set/Switch", "on"
+				next unless $room.lightSwitch
+				
+				currentStatus = $planetside.get_online_status("Xasin");
+				if(currentStatus and not @PS2Status) then
+					@prePS2Color = $room.lightColor
+					@PS2Status = true;
+
+					$room.lights = "#936AFC";
+				elsif(not currentStatus and @PS2Status) then
+					@PS2Status = false;
+					$room.lights = @prePS2Color unless $room.lightColor != "#936AFC"
 				end
 			end
 		end.abort_on_exception = true;
@@ -130,6 +114,7 @@ module Hooks
 		$cSpeak.daylight_getter do
 			t = Time.now();
 			currentTime = ((t.wday-1)%7).days + t.hour.hours + t.min.minutes + t.sec
+
 			@daylightInterpolator.at(currentTime);
 		end
 	end
