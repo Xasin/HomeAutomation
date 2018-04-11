@@ -4,7 +4,7 @@ require_relative '../Libs/InterpolateTools.rb'
 
 module Hooks
 	module Lights
-		$lightsOnTime = 16.hours
+		$lightsOnTime = 18.5.hours
 
 		@switchValue = $mqtt.track "Room/default/Lights/Switch"
 		@xasinHome = $mqtt.track "Personal/Xasin/IsHome"
