@@ -6,6 +6,13 @@ end
 sentence "computer good night and sweet dreams" do
 	$room.command "gn"
 end
+sentence "computer set my alarm please" do
+	$room.command "clk"
+end
+
+sentence "computer what time is it" do
+	$xasin.notify "It is #{Time.now().hour} #{Time.now().min}"
+end
 
 sentence "computer i am back home" do
 	$xasin.home = true;
@@ -18,6 +25,6 @@ sentence "computer how are you doing" do
 	$xasin.notify "I am doing quite well, thank you for asking."
 end
 
-sentence /(red|blue|stand down) alert/ do |match|
-	$player.alert = match[1];
-end
+#sentence /(red|blue|stand down) alert/ do |match|
+#	$player.alert = match[1];
+#end
