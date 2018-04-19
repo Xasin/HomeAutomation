@@ -23,10 +23,10 @@ module Messaging
 	end
 
 	@XasinHome = $mqtt.track "Personal/Xasin/IsHome" do |newState|
-		@ttsMEndpoint.available = (@XasinHome.value == "true" and @XasinAwake.value != "none");
+		@ttsMEndpoint.available = ((@XasinHome.value == "true") and (@XasinAwake.value != "none"));
 	end
 	@XasinAwake = $mqtt.track "Personal/Xasin/Switching/Who" do |newState|
-		@ttsMEndpoint.available = (@XasinHome.value == "true" and @XasinAwake.value != "none");
+		@ttsMEndpoint.available = ((@XasinHome.value == "true") and (@XasinAwake.value != "none"));
 	end
 
 	$telegram.on_message do |message|
