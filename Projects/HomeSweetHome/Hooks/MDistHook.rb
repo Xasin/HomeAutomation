@@ -21,8 +21,12 @@ module Messaging
 	@ttsMEndpoint = $messageDistributor.add_endpoint() do |data|
 		$cSpeak.process_message(data);
 	end
-	$mqtt.track "Personal/Xasin/IsHome" do |newState|
-		@ttsMEndpoint.available = (newState == "true");
+
+	@XasinHome = $mqtt.track "Personal/Xasin/IsHome" do |newState|
+		@ttsMEndpoint.available = ((@XasinHome.value == "true") and (@XasinAwake.value != "none"));
+	end
+	@XasinAwake = $mqtt.track "Personal/Xasin/Switching/Who" do |newState|
+		@ttsMEndpoint.available = ((@XasinHome.value == "true") and (@XasinAwake.value != "none"));
 	end
 
 	$telegram.on_message do |message|
