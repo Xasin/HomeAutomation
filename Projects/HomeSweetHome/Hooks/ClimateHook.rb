@@ -54,7 +54,7 @@ module Hooks
 				$mqtt.publish_to "Room/default/Sensors/Temperature", @humidSensor.temperature;
 				$mqtt.publish_to "Room/default/Sensors/Humidity", @humidSensor.humidity;
 
-				next unless $xasin.awake? and $xasin.home?
+				next unless $xasin.awake_and_home?
 
 				if case @humidSensor.humidity
 						when 53..58

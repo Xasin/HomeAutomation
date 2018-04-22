@@ -5,7 +5,7 @@ module Welcome
 
 @computerTrack = $mqtt.track "Room/default/X-Desktop/Status"
 
-$mqtt.track "Personal/Xasin/IsHome" do |data|
+$xasin.home? do |data|
 	if(data == "true") then
 		if($xasin.awake?)
 			who = $xasin.switch;
