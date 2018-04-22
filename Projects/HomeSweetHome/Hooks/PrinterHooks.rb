@@ -1,5 +1,4 @@
 require 'json'
-require_relative '../SetupEnv.rb'
 
 module Hooks
 module Printer
@@ -17,7 +16,7 @@ $mqtt.subscribe_to "octoprint/event/PrintStarted" do
 end
 
 $mqtt.subscribe_to "octoprint/progress/printing" do |data|
-	printProgress = JSON.parse data
+	printProgress = JSON.parse(data)
 
 	if (printProgress["progress"] >= 98) and (@printerData[:status] == :printing)
 		@printTTS.speak("The print is almost complete.", Color.RGB(0, 255, 0));
