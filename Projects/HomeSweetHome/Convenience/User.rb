@@ -45,7 +45,7 @@ module Convenience
 		def awake_and_home?(&callback)
 			@on_home_awake_change << callback if callback;
 
-			return awake? and home?;
+			return (self.awake? and self.home?);
 		end
 		def awake?(&callback)
 			@on_awake_change << callback if callback;
