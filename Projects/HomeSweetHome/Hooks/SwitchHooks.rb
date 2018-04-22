@@ -17,8 +17,10 @@ module Hooks
 		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
+			push_member = newMember;
+			push_member = "_nil" if newMember == "none"
 			begin
-			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{newMember}"}}' https://hidden-cliffs-30452.herokuapp.com/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
+			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{push_member}"}}' https://www.switchcounter.science/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
 			rescue
 			end
 
