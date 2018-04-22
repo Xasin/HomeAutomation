@@ -14,7 +14,7 @@ module Hooks
 		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
 		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
 
-		$mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
+		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
 			begin
