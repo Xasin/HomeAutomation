@@ -3,10 +3,6 @@ require_relative 'Libs/CoreExtensions.rb'
 require_relative 'Libs/ColorUtils.rb'
 require 'json'
 
-require_relative 'SetupEnv.rb'
-
-$ttsTopic = ColorSpeak::Client.new($mqtt, "Weather");
-
 class WeatherInfo
 	attr_reader :city
 

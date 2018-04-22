@@ -14,11 +14,13 @@ module Hooks
 		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
 		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
 
-		@who = $mqtt.track "Personal/Xasin/Switching/Who" do |newMember, formerMember|
+		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
+			push_member = newMember;
+			push_member = "_nil" if newMember == "none"
 			begin
-			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{newMember}"}}' https://hidden-cliffs-30452.herokuapp.com/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
+			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{push_member}"}}' https://www.switchcounter.science/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
 			rescue
 			end
 
@@ -31,7 +33,7 @@ module Hooks
 			end
 		end
 
-		$mqtt.subscribe_to "Room/default/Commands" do |tList, data|
+		$room.on_command do |data|
 		if(data == "good morning") then
 			Thread.new do
 				sleepTime = Time.now() + 15.minutes;
@@ -39,7 +41,7 @@ module Hooks
 				while true do
 					sleep 5;
 
-					if(@who.value != "none") then
+					if($xasin.switch != "none") then
 						break;
 					end
 
@@ -54,17 +56,17 @@ module Hooks
 		end
 
 		if(data =~ /sw([nmxs])/) then
-			$mqtt.publish_to "Personal/Xasin/Switching/Who", {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1], retain: true;
+			$xasin.switch = {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1]
 		end
 		if(data == "gn") then
-			$mqtt.publish_to "Personal/Xasin/Switching/Who", "none", retain: true;
+			$xasin.switch = "none"
 		end
 		end
 
 		$telegram.on_message do |message|
 			mText = message[:text].downcase;
 			if(mText =~ /(?:switch|switched)/ and mText =~ /(xasin|neira|mesh)/) then
-				$mqtt.publish_to "Personal/Xasin/Switching/Who", $1.capitalize, retain: true;
+				$xasin.switch = $1.capitalize
 			end
 		end
 	end

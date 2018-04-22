@@ -2,7 +2,6 @@
 require 'json'
 
 require_relative '../Libs/ColorUtils.rb'
-require_relative '../Libs/MQTTSubscriber.rb'
 require_relative '../Libs/Waitpoint.rb'
 
 module ColorSpeak
@@ -22,12 +21,12 @@ class Server
 
 		@newMessageWaitpoint = Xasin::Waitpoint.new();
 
-		@mqtt.subscribe_to "Room/#{@RoomName}/TTS" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/TTS" do |data|
 			h = JSON.parse(data, symbolize_names: true);
 			process_message(h);
 		end
 
-		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Color" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Color" do |data|
 			begin
 				data = JSON.parse(data, symbolize_names: true);
 			rescue
@@ -39,7 +38,7 @@ class Server
 			end
 		end
 
-		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Switch" do |t, data|
+		@mqtt.subscribe_to "Room/#{@RoomName}/Lights/Set/Switch" do |data|
 			@lightOn = (data == "on")
 			update_current_color();
 		end
@@ -150,7 +149,7 @@ class Client
 		outData[:single] 	= true 	if single;
 		outData[:notoast] 	= true	if notoast;
 
-		@mqtt.publishTo "Room/#{@RoomName}/TTS", outData.to_json;
+		@mqtt.publish_to "Room/#{@RoomName}/TTS", outData.to_json;
 	end
 end
 end

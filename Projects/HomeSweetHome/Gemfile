@@ -1,0 +1,4 @@
+
+gem 'mqtt-sub_handler'
+gem 'i2c', "~>0.4"
+gem 'interpolate', "~>0.3"

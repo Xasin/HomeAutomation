@@ -1,4 +1,4 @@
-require_relative '../SetupEnv.rb'
+
 require_relative '../weather.rb'
 
 module Hooks
@@ -22,9 +22,8 @@ module Hooks
 
 					@alarmTime = nil;
 
-					$mqtt.publishTo "Room/default/Commands", "good morning"
-					$mqtt.publishTo "Room/default/Lights/Set/Switch", "on";
-					$mqtt.publishTo "Room/default/Lights/Set/Color", Color.RGB(0, 0, 0);
+					$room.command "good morning"
+					$room.lights = "#000000"
 
 					@wakeupTTS.speak "Good morning, David."
 				end
@@ -86,14 +85,15 @@ module Hooks
 
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
-            @alarmTime += 24.hours if @alarmTime <= Time.now();
-            @wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}"
+         @alarmTime += 24.hours if @alarmTime <= Time.now();
+
+			@wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}"
 
         	@AlarmThread.run
 		end
 		module_function :set_alarm
 
-		$mqtt.subscribeTo "Room/default/Commands" do |t, data|
+		$room.on_command do |data|
 			if(data == "clk") then
 				if not @alarmTime then
 					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
@@ -104,7 +104,7 @@ module Hooks
 			end
 		end
 
-		$mqtt.subscribeTo "Room/default/Alarm/Set" do |t, data|
+		$mqtt.subscribe_to "Room/default/Alarm/Set" do |data|
 			set_alarm(data.to_f.hours);
 		end
 	end
