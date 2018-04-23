@@ -10,7 +10,7 @@ $xasin.home? do |data|
 		if($xasin.awake?)
 			who = $xasin.switch;
 
-			@welcomeTTS.speak "Welcome back home #{who}", Hooks::SwitchHooks::SystemColors[who];
+			@welcomeTTS.speak "Welcome back home #{who}", Hooks::Switching::SystemColors[who];
 			if(Time.today($lightsOnTime) < Time.now()) then
 				$room.lights = true;
 			end
