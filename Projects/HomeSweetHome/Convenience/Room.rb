@@ -5,8 +5,8 @@ module Convenience
 			@mqtt = mqtt;
 			@name = name;
 
-			@lights 			= @mqtt.track "Room/#{@name}/Lights";
-			@lightSwitch	= @mqtt.track "Room/#{@name}/Switch";
+			@lights 			= @mqtt.track "Room/#{@name}/Lights/Color";
+			@lightSwitch	= @mqtt.track "Room/#{@name}/Lights/Switch";
 
 			@commandBlocks = Array.new();
 			@mqtt.subscribe_to "Room/#{@name}/Commands" do |data|
@@ -26,7 +26,7 @@ module Convenience
 			return @lights.value
 		end
 		def lightSwitch
-			return @lightSwitch.value == "on"
+			return (@lightSwitch.value == "on")
 		end
 
 		def command(cmd)
