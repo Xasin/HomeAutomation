@@ -4,8 +4,8 @@ require_relative '../Libs/InterpolateTools.rb'
 
 module Hooks
 	module Lights
-		LIGHT_OFF_THRESHOLD = 250;
-		LIGHT_ON_THRESHOLD  = 200;
+		LIGHT_OFF_THRESHOLD = 200;
+		LIGHT_ON_THRESHOLD  = 250;
 		@roomBrightness = 0;
 		@oldLightSuggestion = false;
 
@@ -15,7 +15,7 @@ module Hooks
 			if($room.lightSwitch)
 				return (@roomBrightness < LIGHT_OFF_THRESHOLD)
 			else
-				return (@roomBrightness > LIGHT_ON_THRESHOLD)
+				return (@roomBrightness < LIGHT_ON_THRESHOLD)
 			end
 		end
 
@@ -26,8 +26,7 @@ module Hooks
 			end
 		end
 
-
-		$xasin.awake_and_home? do |data|
+		$xasin.awake_and_home? do
 			self.update_light_status();
 		end
 		$mqtt.track "Room/default/Sensors/Brightness" do |data|
