@@ -7,6 +7,7 @@ module Hooks
 		LIGHT_OFF_THRESHOLD = 250;
 		LIGHT_ON_THRESHOLD  = 200;
 		@roomBrightness = 0;
+		@oldLightSuggestion = false;
 
 		def self.check_light_status()
 			return false unless $xasin.awake_and_home?
@@ -19,15 +20,18 @@ module Hooks
 		end
 
 		def self.update_light_status()
-			$room.lights = check_light_status();
+			if(@oldLightSuggestion != check_light_status) then
+				@oldLightSuggestion = check_light_status();
+				$room.lights = @oldLightSuggestion;
+			end
 		end
 
-		$mqtt.track "Room/default/Sensors/Brightness" do |data|
-			@roomBrightness = data.to_f
 
+		$xasin.awake_and_home? do |data|
 			self.update_light_status();
 		end
-		$xasin.awake_and_home? do
+		$mqtt.track "Room/default/Sensors/Brightness" do |data|
+			@roomBrightness = data.to_f
 			self.update_light_status();
 		end
 
