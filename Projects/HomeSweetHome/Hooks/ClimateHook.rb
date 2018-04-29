@@ -42,20 +42,39 @@ module Hooks
 			end
 		end
 
+		class GY_30
+			def initialize(twi)
+				@twi = twi;
+
+				@twi.write(0x23, [0x10].pack("C"));
+				@lastMeasured = 0;
+			end
+
+			def brightness()
+				begin
+					@lastMeasured = @twi.read(0x23, 2).unpack("S>")[0];
+				rescue
+				end
+
+				return @lastMeasured;
+			end
+		end
+
 		@HumidityTTS = ColorSpeak::Client.new($mqtt, "HumidityWarning");
 
 		@humidityWarned = false;
 		@lastNotified = Time.new(0);
 
+		@lightSensor = GY_30.new($twi);
 		@humidSensor = SI7021.new($twi);
 		Thread.new do
 			loop do
 				sleep 30;
 				$mqtt.publish_to "Room/default/Sensors/Temperature", @humidSensor.temperature;
 				$mqtt.publish_to "Room/default/Sensors/Humidity", @humidSensor.humidity;
+				$mqtt.publish_to "Room/default/Sensors/Brightness", @lightSensor.brightness;
 
 				next unless $xasin.awake_and_home?
-
 				if case @humidSensor.humidity
 						when 53..58
 							next if @lastNotified + 3.hours >= Time.now();
