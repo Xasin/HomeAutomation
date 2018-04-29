@@ -4,7 +4,32 @@ require_relative '../Libs/InterpolateTools.rb'
 
 module Hooks
 	module Lights
-		$lightsOnTime = 18.hours
+		LIGHT_OFF_THRESHOLD = 250;
+		LIGHT_ON_THRESHOLD  = 200;
+		@roomBrightness = 0;
+
+		def self.check_light_status()
+			return false unless $xasin.awake_and_home?
+
+			if($room.lightSwitch)
+				return (@roomBrightness < LIGHT_OFF_THRESHOLD)
+			else
+				return (@roomBrightness > LIGHT_ON_THRESHOLD)
+			end
+		end
+
+		def self.update_light_status()
+			$room.lights = check_light_status();
+		end
+
+		$mqtt.track "Room/default/Sensors/Brightness" do |data|
+			@roomBrightness = data.to_f
+
+			self.update_light_status();
+		end
+		$xasin.awake_and_home? do
+			self.update_light_status();
+		end
 
 		$room.on_command do |data|
 			if(data == "e") then
@@ -45,11 +70,6 @@ module Hooks
 			loop do
 				sleep 20
 				next unless $xasin.home?
-
-				if (Time.today($lightsOnTime).between? Time.now() - 20, Time.now())
-					$room.lights = true;
-				end
-
 				next unless $room.lightSwitch
 
 				currentStatus = $planetside.get_online_status("Xasin");
