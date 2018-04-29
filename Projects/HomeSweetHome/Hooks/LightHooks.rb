@@ -28,14 +28,14 @@ module Hooks
 				$room.lights = ($~[1] == "on");
 			when /daylight(?:[^\d]*(\d{1,3})%|)/
 				if($~[1]) then
-					$room.lights = Color.RGB(255,255,255).set_brightness($~[1].to_i * 25.5);
+					$room.lights = Color.RGB(255,255,255).set_brightness($~[1].to_i * 25.5).to_s;
 				else
 					$room.lights = "#000000"
 				end
 			when /lights .*#([\da-f]{6})/, /lights .*to .*([\da-f]{6})[^k]/
-				$room.lights = Color.from_s("#" + $~[1])
+				$room.lights = Color.from_s("#" + $~[1]).to_s;
 			when /lights .*(\d{4,})k(?:[^\d]*(\d{1,3})%|)/
-				$room.lights = Color.temperature($~[1].to_i, $~[2] ? $~[2].to_f/100 : 1);
+				$room.lights = Color.temperature($~[1].to_i, $~[2] ? $~[2].to_f/100 : 1).to_s;
 			end
 		end
 
@@ -51,7 +51,7 @@ module Hooks
 				end
 
 				next unless $room.lightSwitch
-				
+
 				currentStatus = $planetside.get_online_status("Xasin");
 				if(currentStatus and not @PS2Status) then
 					@prePS2Color = $room.lightColor
