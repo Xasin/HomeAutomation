@@ -1,6 +1,4 @@
 
-require_relative '../SetupEnv.rb'
-
 module Hooks
 	module Switching
 
