@@ -45,17 +45,27 @@ module Hooks
 		class GY_30
 			def initialize(twi)
 				@twi = twi;
-
-				@twi.write(0x23, [0x10].pack("C"));
+				
+				begin
+					@twi.write(0x23, [0x10].pack("C"));
+				rescue
+					puts "GY-30 init failed"
+				end
 				@lastMeasured = 0;
 			end
 
 			def brightness()
-				begin
+				begin 
+					loop do
 					@lastMeasured = @twi.read(0x23, 2).unpack("S>")[0];
-				rescue
-				end
 
+					if(@lastMeasured == 0) then
+						@twi.write(0x23, [0x10].pack("C"));
+					end
+				rescue
+					puts "GY-30 didn't answer!"
+				end
+				
 				return @lastMeasured;
 			end
 		end

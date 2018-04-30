@@ -11,9 +11,6 @@ $xasin.home? do |data|
 			who = $xasin.switch;
 
 			@welcomeTTS.speak "Welcome back home #{who}", Hooks::Switching::SystemColors[who];
-			if(Time.today($lightsOnTime) < Time.now()) then
-				$room.lights = true;
-			end
 
 			`etherwake 54:a0:50:50:d6:ac` if(@computerTrack.value == "SUSPENDED");
 		end
