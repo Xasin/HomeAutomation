@@ -4,8 +4,8 @@ require_relative '../Libs/InterpolateTools.rb'
 
 module Hooks
 	module Lights
-		LIGHT_OFF_THRESHOLD = 250;
-		LIGHT_ON_THRESHOLD  = 200;
+		LIGHT_OFF_THRESHOLD = 150;
+		LIGHT_ON_THRESHOLD  = 90;
 		@roomBrightness = 0;
 		@oldLightSuggestion = false;
 
