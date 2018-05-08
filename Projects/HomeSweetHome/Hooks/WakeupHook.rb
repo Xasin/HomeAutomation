@@ -76,7 +76,7 @@ module Hooks
 			@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
 			lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
 			$xasin.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switching::SystemColors[lowestSwitch[0]],
-					gid: SwitchHelp,
+					gid: "SwitchHelp",
 					data: lowestSwitch[1],
 					type: "percentage"
 		end
