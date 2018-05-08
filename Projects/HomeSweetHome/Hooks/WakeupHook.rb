@@ -36,14 +36,14 @@ module Hooks
 			@switchPercentTrack = JSON.parse(newData)["percentage"];
 		end
 
-		def initial_wakeup
+		def self.initial_wakeup
 			@weatherEvent.set(Time.now + 5.minutes)
 			@switchRecommendEvent.set(Time.now + 1.minutes);
 
 			@wakeupTTS.speak "Good morning, David."
 		end
 
-		def weather_report
+		def self.weather_report
 			begin
 				newWeatherData = $weather.fiveday_data["list"];
 			rescue
@@ -72,7 +72,7 @@ module Hooks
 			end
 		end
 
-		def switch_recommend
+		def self.switch_recommend
 			@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
 			lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
 			$xasin.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.", Switching::SystemColors[lowestSwitch[0]],
