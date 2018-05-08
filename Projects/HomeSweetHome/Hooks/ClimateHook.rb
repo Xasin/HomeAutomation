@@ -56,7 +56,6 @@ module Hooks
 
 			def brightness()
 				begin 
-					loop do
 					@lastMeasured = @twi.read(0x23, 2).unpack("S>")[0];
 
 					if(@lastMeasured == 0) then
