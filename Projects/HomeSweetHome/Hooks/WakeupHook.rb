@@ -44,31 +44,33 @@ module Hooks
 		end
 
 		def self.weather_report
-			begin
-				newWeatherData = $weather.fiveday_data["list"];
-			rescue
-			else
-				@wData = newWeatherData;
-			end
-
-			if @wData
-				@wakeupTTS.speak "And now, the weather report: "
-				sleep 3;
-
-				first = true;
-				@wData.each do |d|
-					next  if d["dt"].to_i <= Time.now().to_i;
-					break if d["dt"].to_i >= Time.today(23.hours).to_i;
-
-					@wakeupTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first),
-							Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5),
-							data: d["main"]["temp"].to_i,
-							type: "temperature"
-
-					first = false;
+			Thread.new do
+				begin
+					newWeatherData = $weather.fiveday_data["list"];
+				rescue
+				else
+					@wData = newWeatherData;
 				end
-			else
-				@wakeupTTS.speak "Weather forecast currently unavailable."
+
+				if @wData
+					@wakeupTTS.speak "And now, the weather report: "
+					sleep 3;
+
+					first = true;
+					@wData.each do |d|
+						next  if d["dt"].to_i <= Time.now().to_i;
+						break if d["dt"].to_i >= Time.today(23.hours).to_i;
+
+						@wakeupTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first),
+								Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5),
+								data: d["main"]["temp"].to_i,
+								type: "temperature"
+
+						first = false;
+					end
+				else
+					@wakeupTTS.speak "Weather forecast currently unavailable."
+				end
 			end
 		end
 
