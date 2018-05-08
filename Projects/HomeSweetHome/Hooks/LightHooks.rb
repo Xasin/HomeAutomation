@@ -35,16 +35,17 @@ module Hooks
 		end
 
 		$room.on_command do |data|
-			if(data == "e") then
+			case data
+			when "e"
 				$room.lights = (not $room.lightSwitch);
-			elsif(data == "ld") then
+			when "ld"
 				$room.lights = "#000000"
-			elsif(data =~ /lh([\d]{1,3})/) then
+			when "gm"
+				$room.lights = "#000000" if @roomBrightness < LIGHT_OFF_THRESHOLD
+			when /^lh([\d]{1,3})$/
 				$room.lights = Color.HSV($~[1].to_i)
-			elsif(data =~ /l([\da-f]{6})/) then
+			when /^l([\da-f]{6})$/
 				$room.lights = Color.from_s("#" + $~[1])
-			elsif(data == "gn") then
-				$room.lights = false;
 			end
 		end
 
@@ -97,7 +98,7 @@ module Hooks
 			18.hours => Color.K(3000, 1),
 			20.hours	=> Color.K(3000, 1),
 			22.hours => Color.K(2400, 0.7),
-			24.hours => Color.K(1800, 0.5),
+			23.hours => Color.K(1800, 0.5),
 		};
 		@daylightProfile = dayProfile.clone();
 
