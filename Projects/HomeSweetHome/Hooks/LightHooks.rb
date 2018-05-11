@@ -5,7 +5,7 @@ require_relative '../Libs/InterpolateTools.rb'
 module Hooks
 	module Lights
 		LIGHT_OFF_THRESHOLD = 150;
-		LIGHT_ON_THRESHOLD  = 90;
+		LIGHT_ON_THRESHOLD  = 80;
 		@roomBrightness = 0;
 		@oldLightSuggestion = false;
 
@@ -98,7 +98,7 @@ module Hooks
 			18.hours => Color.K(3000, 1),
 			20.hours	=> Color.K(3000, 1),
 			22.hours => Color.K(2400, 0.7),
-			23.hours => Color.K(1800, 0.5),
+			23.hours => Color.K(1500, 0.3),
 		};
 		@daylightProfile = dayProfile.clone();
 
