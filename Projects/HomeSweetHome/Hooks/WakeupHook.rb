@@ -63,8 +63,7 @@ module Hooks
 
 						@wakeupTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first),
 								Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5),
-								data: d["main"]["temp"].to_i,
-								type: "temperature"
+								temperature: d["main"]["temp"].to_i
 
 						first = false;
 					end
@@ -80,8 +79,7 @@ module Hooks
 			$xasin.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.",
 					color: Switching::SystemColors[lowestSwitch[0]],
 					gid: "SwitchHelp",
-					data: lowestSwitch[1],
-					type: "percentage"
+					percentage: lowestSwitch[1]
 		end
 
 		$room.on_command do |data|
@@ -125,8 +123,7 @@ module Hooks
          @alarmTime += 24.hours if @alarmTime <= Time.now();
 
 			@wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}",
-				data: @alarmTime,
-				type: "time"
+				time: @alarmTime
 
         	@AlarmThread.run
 		end
