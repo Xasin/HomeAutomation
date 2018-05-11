@@ -140,14 +140,11 @@ class Client
 		@topic = topic;
 	end
 
-	def speak(t, c = nil, single: nil, notoast: false)
-		outData = {
-			text: 	t,
-			gid:	@topic,
-		};
+	def speak(t, c = nil, **outData)
+		outData[:text] = t;
+		outData[:gid]	= @topic;
+
 		outData[:color] 	= c 		if c;
-		outData[:single] 	= true 	if single;
-		outData[:notoast] 	= true	if notoast;
 
 		@mqtt.publish_to "Room/#{@RoomName}/TTS", outData.to_json;
 	end
