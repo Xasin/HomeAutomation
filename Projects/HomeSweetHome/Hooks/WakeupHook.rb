@@ -101,7 +101,7 @@ module Hooks
 		end
 
 		$telegram.on_message do |data|
-			if data =~ /recommend .*switch/ then
+			if /(recommend|suggest) .*switch/ =~ data.downcase then
 				switch_recommend
 			end
 		end
