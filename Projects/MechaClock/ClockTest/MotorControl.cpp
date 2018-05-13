@@ -50,8 +50,6 @@ namespace Motor {
 			if(fabs(mDiff) < 10)
 				break;
 		}
-
-		_delay_ms(10);
 	}
 
 	void init() {
@@ -69,7 +67,7 @@ namespace Motor {
 
 		uint8_t conseq_stops = 0;
 		while(conseq_stops < 10) {
-			motorTarget = motorPosition + 1000;
+			motorTarget = motorPosition - 1000;
 			if(fabs(motorSpeed) < 1)
 				conseq_stops++;
 			else
