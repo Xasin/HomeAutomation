@@ -1,4 +1,6 @@
+
 #include "MotorControl.h"
+#include "DigitControl.h"
 
 #define SEGMENTS  10
 #define DIGIT_NUM 3
@@ -48,26 +50,11 @@ void dialDigit(uint8_t digitNum, uint8_t segmentNum) {
 }
 
 void printDigits() {
-	for(uint8_t i=0; i<DIGIT_NUM; i++) {
-		Serial.print(currentSignPositions[i]%SEGMENTS);
+	for(uint8_t i=0; i<NUM_DIGITS; i++) {
+		Serial.print(Digits::currentDigits[i]);
 		Serial.print(" ");
 	}
 	Serial.print("\n");
-}
-
-
-void updateNumbers() {
-	Serial.println("Updating digits:");
-	for(uint8_t i=(DIGIT_NUM-1); i!=255; i--) {
-		if((currentSignPositions[i]%SEGMENTS) != signDigits[i])
-		dialDigit(signDigits[i], i);
-	}
-}
-
-void setupNumber(uint32_t newNumber) {
-	for(uint8_t i=0; i<DIGIT_NUM; i++) {
-		signDigits[i] = (newNumber/(uint8_t)pow(10,i))%10;
-	}
 }
 
 void setup() {
@@ -80,5 +67,10 @@ void setup() {
 
 uint16_t dialNumber = 0;
 void loop() {
-	sleep(10);
+	delay(3000);
+
+	dialNumber = random(0, 999);
+	Serial.println(dialNumber);
+	Digits::update_digits(dialNumber);
+	printDigits();
 }
