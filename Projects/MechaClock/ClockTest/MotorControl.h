@@ -14,7 +14,7 @@
 
 #define UPDATE_FREQ 100
 
-#define STEPS_PER_REV 2125
+#define STEPS_PER_REV 2124
 
 namespace Motor {
   void init();
