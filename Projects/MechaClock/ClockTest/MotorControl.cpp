@@ -48,7 +48,7 @@ namespace Motor {
 		while(true) {
 			mDiff = (motorTarget - motorPosition);
 			if(fabs(mDiff) < 10)
-			break;
+				break;
 		}
 
 		_delay_ms(10);
