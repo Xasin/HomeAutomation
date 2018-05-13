@@ -14,7 +14,7 @@
 
 #define UPDATE_FREQ 100
 
-#define STEPS_PER_REV 412.5*5
+#define STEPS_PER_REV 2125
 
 namespace Motor {
   void init();
@@ -24,4 +24,3 @@ namespace Motor {
 
   void rotateTo(int32_t targetPosition);
 }
-

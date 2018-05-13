@@ -79,11 +79,13 @@ void setup() {
   Serial.begin(9600);
 
 	Motor::init();
+  pinMode(13, OUTPUT);
 }
 
 uint16_t dialNumber = 0;
 void loop() {
-  delay(2000);
-  Motor::rotateTo(STEPS_PER_REV);
   Motor::rotateTo(0);
+  delay(2000);
+  Motor::rotateTo(STEPS_PER_REV * 5);
+  delay(2000);
 }
