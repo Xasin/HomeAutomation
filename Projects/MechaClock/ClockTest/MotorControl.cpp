@@ -52,6 +52,23 @@ namespace Motor {
 		}
 	}
 
+	void home() {
+		uint8_t conseq_stops = 0;
+		while(conseq_stops < 10) {
+			motorTarget = motorPosition - 0.5/P_FACT;
+			if(fabs(motorSpeed) < 1)
+				conseq_stops++;
+			else
+				conseq_stops = 0;
+
+			_delay_ms(10);
+		}
+
+		motorPosition 	= 0;
+		motorTarget   	= 0;
+		lastMotor		= 0;
+	}
+
 	void init() {
 		PORTD |= (1<< MOTOR_C1  | 1<< MOTOR_C2);
 		DDRB  |= (1<< MOTOR_PWM | 1<< MOTOR_DIR);
@@ -65,19 +82,6 @@ namespace Motor {
 
 		TIMSK1|= (1<< TOIE1);
 
-		uint8_t conseq_stops = 0;
-		while(conseq_stops < 10) {
-			motorTarget = motorPosition - 1000;
-			if(fabs(motorSpeed) < 1)
-				conseq_stops++;
-			else
-				conseq_stops = 0;
-
-			_delay_ms(5);
-		}
-
-		motorPosition 	= 0;
-		motorTarget   	= 0;
-		lastMotor		= 0;
+		home();
 	}
 }

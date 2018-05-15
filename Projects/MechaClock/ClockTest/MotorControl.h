@@ -17,10 +17,12 @@
 #define STEPS_PER_REV 2124
 
 namespace Motor {
-  void init();
+	void init();
 
-  void updateEncoder();
-  void updateMotor();
+	void home();
 
-  void rotateTo(int32_t targetPosition);
+	void updateEncoder();
+	void updateMotor();
+
+	void rotateTo(int32_t targetPosition);
 }
