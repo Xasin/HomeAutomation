@@ -5,6 +5,12 @@ namespace Digits {
 	uint8_t currentDigits[NUM_DIGITS] 	= {0};
 	uint8_t targetDigits[NUM_DIGITS]		= {0};
 
+	void home() {
+		for(uint8_t i=0; i<NUM_DIGITS; i++)
+			currentDigits[i] = {0};
+		Motor::home();
+	}
+
 	void raw_dial(uint8_t totalLetter) {
 		Motor::rotateTo(((uint32_t)totalLetter) * STEPS_PER_LETTER);
 

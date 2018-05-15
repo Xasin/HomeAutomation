@@ -77,7 +77,7 @@ namespace Motor {
 		EIMSK |= (1<< INT0);
 
 		TCCR1A = (1<< COM1A1 | 1<< WGM11);
-		TCCR1B = (1<< WGM13 | 1<< CS10);
+		TCCR1B = (1<< WGM13  | 1<< CS10);
 		ICR1   = 8000;
 
 		TIMSK1|= (1<< TOIE1);

@@ -10,6 +10,8 @@ namespace Digits {
 	extern uint8_t currentDigits[];
 	extern uint8_t targetDigits[];
 
+	void home();
+
 	void raw_dial(uint8_t totalLetter);
 	void position_digit(uint8_t totalLetter, uint8_t digitNum);
 	void show_letter(uint8_t letter, uint8_t digitNum);
