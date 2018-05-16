@@ -26,11 +26,18 @@ module Hooks
 				@execTime = time;
 				@runThread.run();
 			end
+
+			def set?
+				return @execTime
+			end
 		end
 	end
 
 	module Wakeup
-		@wakeupTTS  = ColorSpeak::Client.new($mqtt, "Wakeup");
+		@wakeupTTS 		= ColorSpeak::Client.new($mqtt, "Wakeup");
+		@wakeupUser 	= Messaging::UserClient.new($mqtt, "Xasin", "Wakeup");
+
+		@wakeupNotify  = @wakeupTTS;
 
 		$mqtt.track "Personal/Xasin/Switching/Data" do |newData|
 			@switchPercentTrack = JSON.parse(newData)["percentage"];
@@ -40,7 +47,7 @@ module Hooks
 			@weatherEvent.set(Time.now + 5.minutes)
 			@switchRecommendEvent.set(Time.now + 1.minutes);
 
-			@wakeupTTS.speak "Good morning, David."
+			@wakeupNotify.notify "Good morning, David."
 		end
 
 		def self.weather_report
@@ -53,7 +60,7 @@ module Hooks
 				end
 
 				if @wData
-					@wakeupTTS.speak "And now, the weather report: "
+					@wakeupNotify.notify "And now, the weather report: "
 					sleep 3;
 
 					first = true;
@@ -61,14 +68,14 @@ module Hooks
 						next  if d["dt"].to_i <= Time.now().to_i;
 						break if d["dt"].to_i >= Time.today(23.hours).to_i;
 
-						@wakeupTTS.speak $weather.readable_forecast(d, temperature: true, forceDay: first),
-								Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5),
+						@wakeupNotify.notify $weather.readable_forecast(d, temperature: true, forceDay: first),
+								color: Color.HSV(120 - 100*(d["main"]["temp"].to_i - 17)/5),
 								temperature: d["main"]["temp"].to_i
 
 						first = false;
 					end
 				else
-					@wakeupTTS.speak "Weather forecast currently unavailable."
+					@wakeupNotify.notify "Weather forecast currently unavailable."
 				end
 			end
 		end
@@ -76,34 +83,11 @@ module Hooks
 		def self.switch_recommend
 			@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
 			lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
-			$xasin.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.",
+
+			@wakeupNotify.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.",
 					color: Switching::SystemColors[lowestSwitch[0]],
 					gid: "SwitchHelp",
 					percentage: lowestSwitch[1]
-		end
-
-		$room.on_command do |data|
-			case data
-			when "gm"
-				initial_wakeup
-			when "whtr"
-				weather_report
-			when "sr"
-				switch_recommend
-			when "clk"
-				if not @alarmTime then
-					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
-				else
-					@alarmTime = nil;
-					@wakeupTTS.speak "Alarm unset."
-				end
-			end
-		end
-
-		$telegram.on_message do |data|
-			if /(recommend|suggest) .*switch/ =~ data[:text].downcase then
-				switch_recommend
-			end
 		end
 
 		@alarmEvent = TimedEvent.new do
@@ -118,6 +102,34 @@ module Hooks
 			$room.command "sr"
 		end
 
+		$room.on_command do |data|
+			@wakeupNotify = @wakeupTTS;
+
+			case data
+			when "gm"
+				initial_wakeup
+			when "whtr"
+				weather_report
+			when "sr"
+				switch_recommend
+			when "clk"
+				if not @alarmEvent.set? then
+					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
+				else
+					@alarmEvent.set(nil);
+					@wakeupNotify.notify "Alarm unset."
+				end
+			end
+		end
+
+		$telegram.on_message do |data|
+			@wakeupNotify = @wakeupUser;
+
+			if /(recommend|suggest) .*switch/ =~ data[:text].downcase then
+				switch_recommend
+			end
+		end
+
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
          @alarmTime += 24.hours if @alarmTime <= Time.now();
@@ -125,7 +137,7 @@ module Hooks
 			@wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}",
 				time: @alarmTime
 
-        	@AlarmThread.run
+        	@alarmEvent.set(@alarmTime);
 		end
 		module_function :set_alarm
 
