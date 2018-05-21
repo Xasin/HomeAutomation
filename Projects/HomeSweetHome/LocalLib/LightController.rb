@@ -41,7 +41,7 @@ module Hardware
 
 			@roomBrightness = @mqtt.track "Room/#{@roomName}/Sensors/Brightness"
 
-			@mqtt.track "Room/#{@roomName}/Info/Current" do |data|
+			@mqtt.track "Room/#{@roomName}/Notify/Current" do |data|
 				begin
 					data = JSON.parse(data);
 					cO = Color.from_s(data["color"]);
