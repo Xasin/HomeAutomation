@@ -32,7 +32,7 @@ module Hooks
 		end
 
 		$room.on_command do |data|
-		if(data == "good morning") then
+		if(data == "gm") then
 			Thread.new do
 				sleepTime = Time.now() + 15.minutes;
 

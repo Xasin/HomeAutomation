@@ -74,7 +74,7 @@ module Messaging
 			@GID  = gid;
 		end
 
-		def notify(data)
+		def raw_send(data)
 			data[:gid] ||= @GID if @GID;
 			@mqtt.publish_to "Personal/#{@Name}/Notify", data.to_json, qos: 2;
 		end
@@ -85,7 +85,8 @@ module Messaging
 			args[:text] 	= text;
 			args[:color] 	= color.to_s if color;
 
-			notify(args);
+			raw_send(args);
 		end
+		alias notify speak
 	end
 end

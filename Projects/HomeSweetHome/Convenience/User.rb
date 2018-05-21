@@ -28,9 +28,12 @@ module Convenience
 			@on_awake_change 		 = Array.new();
 		end
 
-		def notify(text, **args)
+		def notify(text, color = nil, **args)
 			args[:gid] ||= @GID if @GID;
-			args[:text] = text;
+			args[:text]  = text;
+
+			args[:color] ||= color;
+			args[:color] = args[:color].to_s if args[:color];
 
 			@mqtt.publish_to "Personal/#{@name}/Notify", args.to_json, qos: 2;
 		end
