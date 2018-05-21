@@ -16,10 +16,10 @@ namespace Motor {
 		else
 			PORTB &= ~(1<< MOTOR_DIR);
 
-		if(pwr < 0.02)
+		if(pwr < P_FACT * 4)
 			pwr = 0;
-		else if(pwr < 0.13)
-			pwr = 0.13;
+		else if(pwr < 0.15)
+			pwr = 0.15;
 		else if(pwr > 1)
 			pwr = 1;
 
@@ -50,12 +50,15 @@ namespace Motor {
 			if(fabs(mDiff) < 10)
 				break;
 		}
+
+    _delay_ms(30);
 	}
 
 	void home() {
 		uint8_t conseq_stops = 0;
+
 		while(conseq_stops < 10) {
-			motorTarget = motorPosition - 0.5/P_FACT;
+			motorTarget = motorPosition - 0.7/P_FACT;
 			if(fabs(motorSpeed) < 1)
 				conseq_stops++;
 			else
@@ -64,7 +67,7 @@ namespace Motor {
 			_delay_ms(10);
 		}
 
-		motorPosition 	= 0;
+		motorPosition 	= - HOME_STEP_CORRECT;
 		motorTarget   	= 0;
 		lastMotor		= 0;
 	}

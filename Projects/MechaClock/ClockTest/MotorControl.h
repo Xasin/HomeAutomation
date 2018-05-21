@@ -3,8 +3,8 @@
 #include <math.h>
 #include <util/delay.h>
 
-#define P_FACT 0.03
-#define D_FACT 0.005
+#define P_FACT 0.02
+#define D_FACT 0.1
 
 #define MOTOR_C1 PD2
 #define MOTOR_C2 PD3
@@ -15,6 +15,8 @@
 #define UPDATE_FREQ 100
 
 #define STEPS_PER_REV 2124
+
+#define HOME_STEP_CORRECT 50
 
 namespace Motor {
 	void init();
