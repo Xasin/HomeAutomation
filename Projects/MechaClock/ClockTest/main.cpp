@@ -1,14 +1,15 @@
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
 #include "MotorControl.h"
 #include "DigitControl.h"
 
-#define MOTORS_ON
-#define MOTORS_OFF
+#define MOTORS_ON   PORTB |= (1<< PB2)
+#define MOTORS_OFF  PORTB &=~(1<< PB2)
 
 int16_t currentDial = 0;
-volatile int16_t targetDial = -1;
+volatile int16_t targetDial = 1234;
 
 uint8_t timerAPresc = 1;
 ISR(TIMER1_OVF_vect) {
@@ -19,7 +20,7 @@ ISR(TIMER1_OVF_vect) {
 	}
 }
 
-ISR(INT0_vect) {
+ISR(PCINT1_vect) {
 	Motor::updateEncoder();
 }
 
@@ -46,28 +47,33 @@ ISR(TWI_vect) {
 	TWCR |= (1<< TWINT);
 }
 
-void setup() {
+int main() {
+	DDRB  |= (1<< PB2);
+	PORTB |= (1<< PB2);
+
 	Motor::init();
+	sei();
+	Motor::home();
 
 	TWAR = 0x31 <<1;
-	TWCR = (1<< TWEA | 1<< TWIE | 1<< TWEN);
+	//TWCR = (1<< TWEA | 1<< TWIE | 1<< TWEN);
 
-	sei();
-}
-
-void loop() {
-	if(currentDial != targetDial) {
-		if(targetDial == -1) {
-			Digits::update_digits(0);
-			//MOTORS_OFF;
-			currentDial = -1;
+	while(1) {
+		if(currentDial != targetDial) {
+			if(targetDial == -1) {
+				Digits::update_digits(0);
+				MOTORS_OFF;
+				currentDial = -1;
+			}
+			else if(currentDial == -1) {
+				MOTORS_ON;
+				Digits::home();
+				currentDial = 0;
+			}
+			else
+				Digits::update_digits(currentDial = targetDial);
 		}
-		else if(currentDial == -1) {
-			//MOTORS_ON;
-			Digits::home();
-			currentDial = 0;
-		}
-		else
-			Digits::update_digits(currentDial = targetDial);
 	}
+
+	return 1;
 }

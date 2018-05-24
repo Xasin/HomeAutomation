@@ -6,8 +6,8 @@
 #define P_FACT 0.02
 #define D_FACT 0.1
 
-#define MOTOR_C1 PD2
-#define MOTOR_C2 PD3
+#define MOTOR_C1 PC2
+#define MOTOR_C2 PC3
 
 #define MOTOR_DIR PB0
 #define MOTOR_PWM PB1
