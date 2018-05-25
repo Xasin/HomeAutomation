@@ -4,7 +4,7 @@
 #include <util/delay.h>
 
 #define P_FACT 0.02
-#define D_FACT 0.1
+#define D_FACT 0.05
 
 #define MOTOR_C1 PC2
 #define MOTOR_C2 PC3

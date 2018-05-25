@@ -9,7 +9,7 @@
 #define MOTORS_OFF  PORTB &=~(1<< PB2)
 
 int16_t currentDial = 0;
-volatile int16_t targetDial = 1234;
+volatile int16_t targetDial = -1;
 
 uint8_t timerAPresc = 1;
 ISR(TIMER1_OVF_vect) {
@@ -52,11 +52,11 @@ int main() {
 	PORTB |= (1<< PB2);
 
 	Motor::init();
-	sei();
-	Motor::home();
-
 	TWAR = 0x31 <<1;
-	//TWCR = (1<< TWEA | 1<< TWIE | 1<< TWEN);
+	TWCR = (1<< TWEA | 1<< TWIE | 1<< TWEN);
+	sei();
+
+	Motor::home();
 
 	while(1) {
 		if(currentDial != targetDial) {

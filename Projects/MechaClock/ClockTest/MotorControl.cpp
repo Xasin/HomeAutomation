@@ -52,13 +52,14 @@ namespace Motor {
 		}
 
     _delay_ms(30);
+	 motorTarget = motorPosition;
 	}
 
 	void home() {
 		uint8_t conseq_stops = 0;
 
 		while(conseq_stops < 10) {
-			motorTarget = motorPosition - 0.7/P_FACT;
+			motorTarget = motorPosition - 0.3/P_FACT;
 			if(fabs(motorSpeed) < 1)
 				conseq_stops++;
 			else
@@ -73,8 +74,8 @@ namespace Motor {
 	}
 
 	void init() {
-		PORTC |= (1<< MOTOR_C1  | 1<< MOTOR_C2);
-		DDRB  |= (1<< MOTOR_PWM | 1<< MOTOR_DIR);
+		PORTC  |= (1<< MOTOR_C1  | 1<< MOTOR_C2);
+		DDRB   |= (1<< MOTOR_PWM | 1<< MOTOR_DIR);
 
 		PCMSK1 |= (1<< MOTOR_C1);
 		PCICR  |= (1<< PCIE1);
