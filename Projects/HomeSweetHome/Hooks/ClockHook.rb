@@ -97,6 +97,7 @@ class Clock
 	end
 
 	def _parse_override(data)
+		puts "Parsing: #{data}"
 		begin
 			data = JSON.parse(data);
 			["temperature", "percentage"].each do |k|
@@ -108,8 +109,11 @@ class Clock
 			if(d = data["time"])
 				@currentOverride = Time.new(d.to_i);
 			end
+
+			puts "Set override to: #{@currentOverride}"
 		rescue
 			@currentOverride = nil;
+			puts "Cleared override."
 		end
 	end
 end
