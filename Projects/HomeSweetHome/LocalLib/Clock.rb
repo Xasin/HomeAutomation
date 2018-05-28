@@ -16,6 +16,7 @@ module Hardware
 		end
 
 		def _raw_write(value)
+			value = -1 if value < 0;
 			return if @lastWritten == value;
 
 			retries = 0;
@@ -69,38 +70,29 @@ module Hardware
 			@roomName = room;
 			@user = user;
 
-			if(@user) then
-				@user.awake_and_home? do |data|
-					self.active = data;
-				end
-			end
-
 			@currentOverride = nil;
 			@countdown = false;
+			@active = true;
+
+			@clockThread = Thread.new do _clock_thread end;
 		end
 
 		def _clock_thread
 			loop do
-				sleep 1;
+				sleep 0.5;
 				if @currentOverride
 					if(@countdown and @currentOverride.is_a? Time)
 						@clock.show(@currentOverride - Time.now());
 					end
-				else
+				elsif(@active)
 					@clock.show(Time.now)
+				else
+					@clock.show(-1);
 				end
 			end
 		end
 
 		def _parse_override(data)
-			
-		end
-
-		def active=(value)
-			@clock.active = value;
-		end
-		def active
-			return @clock.active
 		end
 	end
 end
