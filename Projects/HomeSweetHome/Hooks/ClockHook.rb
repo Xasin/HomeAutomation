@@ -84,6 +84,8 @@ class Clock
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
 					@clock.show(@currentOverride - Time.now());
+				else
+					@clock.show(@currentOverride);
 				end
 			elsif(@active)
 				@clock.show(Time.now)
