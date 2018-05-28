@@ -72,6 +72,10 @@ class Clock
 		@active = true;
 
 		@clockThread = Thread.new do _clock_thread end;
+
+		@mqtt.subscribe_to "Room/#{@roomName}/Info/Current" do |data|
+			_parse_override(data);
+		end
 	end
 
 	def _clock_thread
@@ -90,6 +94,20 @@ class Clock
 	end
 
 	def _parse_override(data)
+		begin
+			data = JSON.parse(data);
+			["temperature", "percentage"].each do |k|
+				if (d = data[k])
+					@currentOverride = d.to_i
+				end
+			end
+
+			if(d = data["time"])
+				@currentOverride = Time.new(d.to_i);
+			end
+		rescue
+			@currentOverride = nil;
+		end
 	end
 end
 

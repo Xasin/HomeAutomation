@@ -107,7 +107,8 @@ module Hooks
 					@humidityWarned = true;
 					@lastNotified = Time.now();
 				elsif(@humidSensor.humidity <= 52 and @humidityWarned) then
-					@HumidityTTS.speak "Humidity levels are back to normal.", "#B0B0FF";
+					@HumidityTTS.speak "Humidity levels are back to normal.", "#B0B0FF",
+						percentage: @humidSensor.humidity;
 					@humidityWarned = false;
 				end
 			end
