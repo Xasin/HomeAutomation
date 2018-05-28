@@ -118,7 +118,7 @@ class Server
 				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
-					@mqtt.publish_to "Room/#{@RoomName}/Info/Current", h, retain: true;
+					@mqtt.publish_to "Room/#{@RoomName}/Info/Current", h.to_json, retain: true;
 
 					speechBrightness = [get_recommended_color().get_brightness, 10].max();
 					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
