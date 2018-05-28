@@ -35,7 +35,7 @@ class TWIClock
 
 	def show(value)
 		if(value.is_a? Time) then
-			if(Time.to_i < 99*60)
+			if(value.to_i < 99*60)
 				value = value.min.to_i * 100 + value.sec.to_i
 			else
 				value = (value.hour.to_i * 100 + value.min.to_i)
@@ -72,6 +72,7 @@ class Clock
 		@active = true;
 
 		@clockThread = Thread.new do _clock_thread end;
+		@clockThread.abort_on_exception = true;
 	end
 
 	def _clock_thread
