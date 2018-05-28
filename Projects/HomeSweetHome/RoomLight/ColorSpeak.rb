@@ -118,6 +118,8 @@ class Server
 				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
+					@mqtt.publish_to "Room/#{@RoomName}/Info/Current", h, retain: true;
+
 					speechBrightness = [get_recommended_color().get_brightness, 10].max();
 					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
 					system('espeak -s 140 -g 3 -a 200 "' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
@@ -127,6 +129,7 @@ class Server
 			@speechQueue.delete k;
 		end
 
+		@mqtt.publish_to "Room/#{@RoomName}/Info/Current", nil, retain: true;
 		update_current_color(0.5);
 	end
 end
