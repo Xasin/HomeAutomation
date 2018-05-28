@@ -66,7 +66,6 @@ class Clock
 		@clock = clock;
 
 		@roomName = room;
-		@user = user;
 
 		@currentOverride = nil;
 		@countdown = false;
