@@ -147,9 +147,10 @@ class Client
 		outData[:text] = t;
 		outData[:gid]	= @topic;
 
-		outData[:color] 	= c 		if c;
+		outData[:color] 	= c.to_s 	if c;
 
 		@mqtt.publish_to "Room/#{@RoomName}/TTS", outData.to_json;
 	end
+	alias speak notify
 end
 end
