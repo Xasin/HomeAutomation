@@ -9,27 +9,28 @@ class TWIClock
 
 		@currentDisplay = 0;
 		@active = true;
+
+		@writeRetries = 0;
 	end
 
 	def _raw_write(value)
 		value = -1 if value < 0;
 		return if @lastWritten == value;
 
-		retries = 0;
-
 		begin
 			@twi.write(0x31, [value].pack("s<"));
 		rescue Errno::EIO, Errno::ETIMEDOUT
-			retries += 1;
+			@writeRetries += 1;
 
-			if(retries < 3)
+			if(@writeRetries < 3)
 				sleep 0.5
 				retry;
-			else
+			elsif(@writeRetries == 3)
 				puts "Clock TWI unresponsive!";
 			end
 		else
-			@lastWritten = value;
+			@lastWritten  = value;
+			@writeRetries = 0;
 		end
 	end
 
@@ -84,7 +85,7 @@ class Clock
 			sleep 0.5;
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
-					@clock.show(@currentOverride - Time.now());
+					@clock.show(Time.new(@currentOverride - Time.now()));
 				else
 					@clock.show(@currentOverride);
 				end
