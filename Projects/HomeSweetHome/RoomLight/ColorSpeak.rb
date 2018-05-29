@@ -151,6 +151,6 @@ class Client
 
 		@mqtt.publish_to "Room/#{@RoomName}/TTS", outData.to_json;
 	end
-	alias speak notify
+	alias notify speak
 end
 end
