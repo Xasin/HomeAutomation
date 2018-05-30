@@ -36,17 +36,18 @@ ISR(TWI_vect) {
 
 		case 0x80: // Data byte received
 			if(TWI_writePos < 2) {
-				TWI_writeBuffer |= TWDR<<(TWI_writePos*8);
-				TWI_writePos++;
+				TWI_writeBuffer |= TWDR<<(TWI_writePos++*8);
 			}
 		break;
 
 		case 0xA0: // Final STOP received
-		if(TWI_writeBuffer < 0 || TWI_writeBuffer > 9999)
-			targetDial = -1;
-		else
-			targetDial = TWI_writeBuffer;
-		break;
+			if(TWI_writePos != 2)
+				break;
+			if(TWI_writeBuffer < 0 || TWI_writeBuffer > 9999)
+				targetDial = -1;
+			else
+				targetDial = TWI_writeBuffer;
+			break;
 
 		default: break;
 	}
