@@ -19,6 +19,9 @@ class TWIClock
 
 		begin
 			@twi.write(0x31, [value].pack("s<"));
+
+			@lastWritten  = value;
+			@writeRetries = 0;
 		rescue Errno::EIO, Errno::ETIMEDOUT
 			@writeRetries += 1;
 
@@ -28,9 +31,6 @@ class TWIClock
 			elsif(@writeRetries == 3)
 				puts "Clock TWI unresponsive!";
 			end
-		else
-			@lastWritten  = value;
-			@writeRetries = 0;
 		end
 	end
 
@@ -82,7 +82,7 @@ class Clock
 
 	def _clock_thread
 		loop do
-			sleep 0.5;
+			sleep 2;
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
 					@clock.show(Time.new(@currentOverride - Time.now()));
