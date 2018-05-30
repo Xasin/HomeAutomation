@@ -36,7 +36,7 @@ ISR(TWI_vect) {
 
 		case 0x80: // Data byte received
 			if(TWI_writePos < 2) {
-				TWI_writeBuffer |= TWDR<<TWI_writePos;
+				TWI_writeBuffer |= TWDR<<(TWI_writePos*8);
 				TWI_writePos++;
 			}
 		break;
