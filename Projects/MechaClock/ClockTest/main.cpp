@@ -25,23 +25,30 @@ ISR(PCINT1_vect) {
 }
 
 uint8_t TWI_writePos 	= 0;
-uint8_t TWI_writeBuffer = 0;
+int16_t TWI_writeBuffer = 0;
 ISR(TWI_vect) {
 	uint8_t TWSR_copy = TWSR & ~0b11;
 	switch(TWSR) {
 		case 0x60: // Address received
 			TWI_writePos = 0;
+			TWI_writeBuffer = 0;
 		break;
 
 		case 0x80: // Data byte received
-			if(TWI_writePos == 0) {
+			if(TWI_writePos < 2) {
+				TWI_writeBuffer |= TWDR<<TWI_writePos;
 				TWI_writePos++;
-				TWI_writeBuffer = TWDR;
-			}
-			else {
-				targetDial = (TWI_writeBuffer | TWDR <<8);
 			}
 		break;
+
+		case 0xA0: // Final STOP received
+		if(TWI_writeBuffer < 0 || TWI_writeBuffer > 9999)
+			targetDial = -1;
+		else
+			targetDial = TWI_writeBuffer;
+		break;
+
+		default: break;
 	}
 
 	TWCR |= (1<< TWINT);
