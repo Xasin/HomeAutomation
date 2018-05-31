@@ -97,7 +97,8 @@ module Hooks
 				Thread.new() do
 					sleep 0.5;
 					$room.lights = false;
-
+					sleep 0.5;
+					
 					sleepLeft = @alarmEvent.set? - Time.now()
 					if(sleepLeft >= 2.hours) then
 						sleepLeft = "#{(sleepLeft / 1.hours).round(0)} hours"
@@ -158,7 +159,7 @@ module Hooks
          @alarmTime += 24.hours if @alarmTime <= Time.now();
 
 			@wakeupTTS.speak "Alarm set for #{@alarmTime.hour} #{@alarmTime.min}",
-				time: @alarmTime
+				time: @alarmTime.to_i
 
         	@alarmEvent.set(@alarmTime);
 		end
