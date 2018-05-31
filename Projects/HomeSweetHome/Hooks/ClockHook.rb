@@ -60,7 +60,8 @@ class TWIClock
 end
 
 class Clock
-	attr_accessor :active
+	attr_reader :currentValue
+	attr_reader :active
 
 	def initialize(mqtt, clock, room: "default")
 		@mqtt = mqtt;
@@ -80,19 +81,26 @@ class Clock
 		end
 	end
 
+	def show(value)
+		@currentValue = value;
+		if(@clock)
+			@clock.show(value);
+		end
+	end
+
 	def _clock_thread
 		loop do
 			sleep 2;
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
-					@clock.show(Time.new(@currentOverride - Time.now()));
+					show(Time.new(@currentOverride - Time.now()));
 				else
-					@clock.show(@currentOverride);
+					show(@currentOverride);
 				end
 			elsif(@active)
-				@clock.show(Time.now)
+				show(Time.now)
 			else
-				@clock.show(-1);
+				show(-1);
 			end
 		end
 	end
@@ -112,6 +120,13 @@ class Clock
 			end
 		rescue
 		end
+
+		@clockThread.run;
+	end
+
+	def active=(value)
+		@active = value;
+		@clockThread.run;
 	end
 end
 
