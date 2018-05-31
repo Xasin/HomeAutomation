@@ -101,8 +101,9 @@ module Hooks
 					sleepLeft = "#{sleepLeft / 1.hours} hours"
 				else
 					sleepLeft = "#{sleepLeft / 1.minutes} minutes"
-					@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
 				end
+				
+				@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
 
 				@sleepLastRecommended = Time.now();
 			end
