@@ -46,13 +46,17 @@ module Convenience
 		end
 
 		def awake_and_home?(&callback)
-			@on_home_awake_change << callback if callback;
-
+			if callback;
+				@on_home_awake_change << callback
+				callback.call(awake_and_home?)
+			end
 			return (self.awake? and self.home?);
 		end
 		def awake?(&callback)
-			@on_awake_change << callback if callback;
-
+			if callback;
+				@on_awake_change << callback
+				callback.call(awake?)
+			end
 			return @switchTrack.value != "none";
 		end
 		def home?(&callback)

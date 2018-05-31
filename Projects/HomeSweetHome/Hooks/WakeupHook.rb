@@ -94,18 +94,21 @@ module Hooks
 		@sleepLastRecommended = Time.new(0);
 		def self.check_sleep
 			if(!$xasin.awake? and @alarmEvent.set? and (@sleepLastRecommended+10.minutes < Time.now))
-				Thread.new() do sleep 1; $room.lights = false; end;
+				Thread.new() do
+					sleep 0.5;
+					$room.lights = false;
 
-				sleepLeft = @alarmEvent.set? - Time.now()
-				if(sleepLeft >= 2.hours) then
-					sleepLeft = "#{sleepLeft / 1.hours} hours"
-				else
-					sleepLeft = "#{sleepLeft / 1.minutes} minutes"
+					sleepLeft = @alarmEvent.set? - Time.now()
+					if(sleepLeft >= 2.hours) then
+						sleepLeft = "#{(sleepLeft / 1.hours).round(0)} hours"
+					else
+						sleepLeft = "#{(sleepLeft / 1.minutes).round(-1)} minutes"
+					end
+
+					@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
+
+					@sleepLastRecommended = Time.now();
 				end
-				
-				@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
-
-				@sleepLastRecommended = Time.now();
 			end
 		end
 
