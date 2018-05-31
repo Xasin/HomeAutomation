@@ -51,6 +51,7 @@ module Hooks
 		end
 
 		def self.weather_report
+			@weatherEvent.set(nil);
 			Thread.new do
 				begin
 					newWeatherData = $weather.fiveday_data["list"];
@@ -61,7 +62,7 @@ module Hooks
 
 				if @wData
 					@wakeupNotify.notify "And now, the weather report: "
-					sleep 3;
+					sleep 8;
 
 					first = true;
 					@wData.each do |d|
@@ -90,6 +91,23 @@ module Hooks
 					percentage: lowestSwitch[1]
 		end
 
+		@sleepLastRecommended = Time.new(0);
+		def self.check_sleep
+			if(!$xasin.awake? and @alarmEvent.set? and (@sleepLastRecommended+10.minutes < Time.now))
+				Thread.new() do sleep 1; $room.lights = false; end;
+
+				sleepLeft = @alarmEvent.set? - Time.now()
+				if(sleepLeft >= 2.hours) then
+					sleepLeft = "#{sleepLeft / 1.hours} hours"
+				else
+					sleepLeft = "#{sleepLeft / 1.minutes} minutes"
+					@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
+				end
+
+				@sleepLastRecommended = Time.now();
+			end
+		end
+
 		@alarmEvent = TimedEvent.new do
 			$room.command "gm"
 		end
@@ -104,6 +122,7 @@ module Hooks
 
 		$room.on_command do |data|
 			@wakeupNotify = @wakeupTTS;
+			check_sleep;
 
 			case data
 			when "gm"
