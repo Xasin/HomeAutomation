@@ -134,7 +134,8 @@ module Hooks
 		};
 
 		$mqtt.track "Room/default/Alarm/Unix" do |data|
-			begin
+				@daylightInterpolator = Interpolate::Points.new(@daylightProfile)
+
 				time = Time.at(data.to_i);
 				offset = ((time.wday-1)%7).days + t.hour.hours + t.min.minutes + t.sec;
 
@@ -142,9 +143,8 @@ module Hooks
 				Interpolate::mix_looped(daylightProfile_clone, wakeupProfile, offset: offset, upperBound: 7.days, spacing: 0.5.hours)
 
 				@daylightInterpolator = Interpolate::Points.new(daylightProfile_clone);
-			rescue
-				@daylightInterpolator = Interpolate::Points.new(@daylightProfile)
-			end
+
+
 		end
 
 		$cSpeak.daylight_getter do
