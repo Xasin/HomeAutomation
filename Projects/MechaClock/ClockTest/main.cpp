@@ -27,7 +27,6 @@ ISR(PCINT1_vect) {
 uint8_t TWI_writePos 	= 0;
 int16_t TWI_writeBuffer = 0;
 ISR(TWI_vect) {
-	uint8_t TWSR_copy = TWSR & ~0b11;
 	switch(TWSR) {
 		case 0x60: // Address received
 			TWI_writePos = 0;

@@ -44,9 +44,8 @@ namespace Motor {
 	void rotateTo(int32_t steps) {
 		motorTarget = steps;
 
-		int32_t mDiff = 0;
 		while(true) {
-			mDiff = (motorTarget - motorPosition);
+			int32_t mDiff = (motorTarget - motorPosition);
 			if(fabs(mDiff) < 10)
 				break;
 		}
