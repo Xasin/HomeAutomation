@@ -28,9 +28,12 @@ module Convenience
 			@on_awake_change 		 = Array.new();
 		end
 
-		def notify(text, **args)
+		def notify(text, color = nil, **args)
 			args[:gid] ||= @GID if @GID;
-			args[:text] = text;
+			args[:text]  = text;
+
+			args[:color] ||= color;
+			args[:color] = args[:color].to_s if args[:color];
 
 			@mqtt.publish_to "Personal/#{@name}/Notify", args.to_json, qos: 2;
 		end
@@ -43,13 +46,17 @@ module Convenience
 		end
 
 		def awake_and_home?(&callback)
-			@on_home_awake_change << callback if callback;
-
+			if callback;
+				@on_home_awake_change << callback
+				callback.call(awake_and_home?)
+			end
 			return (self.awake? and self.home?);
 		end
 		def awake?(&callback)
-			@on_awake_change << callback if callback;
-
+			if callback;
+				@on_awake_change << callback
+				callback.call(awake?)
+			end
 			return @switchTrack.value != "none";
 		end
 		def home?(&callback)

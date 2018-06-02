@@ -6,17 +6,25 @@ module Welcome
 @computerTrack = $mqtt.track "Room/default/X-Desktop/Status"
 
 $xasin.home? do |data|
+	next unless $xasin.awake?
+
 	if(data == "true") then
-		if($xasin.awake?)
-			who = $xasin.switch;
+		who = $xasin.switch;
 
-			@welcomeTTS.speak "Welcome back home #{who}", Hooks::Switching::SystemColors[who];
+		@welcomeTTS.speak "Welcome back home #{who}", Hooks::Switching::SystemColors[who];
 
-			`etherwake 54:a0:50:50:d6:ac` if(@computerTrack.value == "SUSPENDED");
-		end
+		`etherwake 54:a0:50:50:d6:ac` if(@computerTrack.value == "SUSPENDED");
 	else
 		$telegram.send_message("See you around!", disable_notification: true);
-		$room.lights = false;
+	end
+end
+
+$room.on_command do |data|
+	case data
+	when "bye"
+		$xasin.home = false;
+	when "hi"
+		$xasin.home = true;
 	end
 end
 

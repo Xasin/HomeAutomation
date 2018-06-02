@@ -45,7 +45,7 @@ module Hooks
 		class GY_30
 			def initialize(twi)
 				@twi = twi;
-				
+
 				begin
 					@twi.write(0x23, [0x10].pack("C"));
 				rescue
@@ -55,8 +55,7 @@ module Hooks
 			end
 
 			def brightness()
-				begin 
-					loop do
+				begin
 					@lastMeasured = @twi.read(0x23, 2).unpack("S>")[0];
 
 					if(@lastMeasured == 0) then
@@ -65,7 +64,7 @@ module Hooks
 				rescue
 					puts "GY-30 didn't answer!"
 				end
-				
+
 				return @lastMeasured;
 			end
 		end
@@ -88,21 +87,28 @@ module Hooks
 				if case @humidSensor.humidity
 						when 53..58
 							next if @lastNotified + 3.hours >= Time.now();
-							@HumidityTTS.speak "Room humidity is at #{@humidSensor.humidity.round(1)} percent. Maybe you could open the window?", "#a0a0FF";
+							@HumidityTTS.speak "Room humidity is at #{@humidSensor.humidity.round(1)} percent. Maybe you could open the window?",
+								"#a0a0FF",
+								percentage: @humidSensor.humidity
 							true
 						when 58..65
 							next if @lastNotified + 1.hours >= Time.now();
-							@HumidityTTS.speak "Room humidity is slightly high at #{@humidSensor.humidity.round(1)} percent. Please open the window.", "#6060FF";
+							@HumidityTTS.speak "Room humidity is slightly high at #{@humidSensor.humidity.round(1)} percent. Please open the window.",
+								"#6060FF",
+								percentage: @humidSensor.humidity
 							true
 						when 65..100
 							next if @lastNotified + 20.minutes >= Time.now();
-							@HumidityTTS.speak "This room is extremely humid at #{@humidSensor.humidity.round(1)} percent, open the windows!", "#6000FF";
+							@HumidityTTS.speak "This room is extremely humid at #{@humidSensor.humidity.round(1)} percent, open the windows!",
+								"#6000FF",
+								percentage: @humidSensor.humidity
 							true
 						end then
 					@humidityWarned = true;
 					@lastNotified = Time.now();
 				elsif(@humidSensor.humidity <= 52 and @humidityWarned) then
-					@HumidityTTS.speak "Humidity levels are back to normal.", "#B0B0FF";
+					@HumidityTTS.speak "Humidity levels are back to normal.", "#B0B0FF",
+						percentage: @humidSensor.humidity;
 					@humidityWarned = false;
 				end
 			end

@@ -118,6 +118,8 @@ class Server
 				h[:text].gsub!(/[^\w\s\.,-:+']/, " ");
 
 				@speaking = true;
+					@mqtt.publish_to "Room/#{@RoomName}/Info/Current", h.to_json, retain: true;
+
 					speechBrightness = [get_recommended_color().get_brightness, 10].max();
 					@led.sendRGB(h[:color] ? h[:color].set_brightness(speechBrightness) : get_current_color, 0.5);
 					system('espeak -s 140 -g 3 -a 200 "' + h[:text] + '" --stdout 2>/dev/null | aplay >/dev/null 2>&1');
@@ -127,6 +129,7 @@ class Server
 			@speechQueue.delete k;
 		end
 
+		@mqtt.publish_to "Room/#{@RoomName}/Info/Current", nil, retain: true;
 		update_current_color(0.5);
 	end
 end
@@ -140,16 +143,14 @@ class Client
 		@topic = topic;
 	end
 
-	def speak(t, c = nil, single: nil, notoast: false)
-		outData = {
-			text: 	t,
-			gid:	@topic,
-		};
-		outData[:color] 	= c 		if c;
-		outData[:single] 	= true 	if single;
-		outData[:notoast] 	= true	if notoast;
+	def speak(t, c = nil, **outData)
+		outData[:text] = t;
+		outData[:gid]	= @topic;
+
+		outData[:color] 	= c.to_s 	if c;
 
 		@mqtt.publish_to "Room/#{@RoomName}/TTS", outData.to_json;
 	end
+	alias notify speak
 end
 end
