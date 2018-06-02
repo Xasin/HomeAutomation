@@ -86,7 +86,7 @@ class Clock
 			sleep 1;
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
-					show(Clock.calculate_timer(Time.new(@currentOverride - Time.now())));
+					show(TWIClock.calculate_timer(Time.new(@currentOverride - Time.now())));
 				else
 					show(@currentOverride);
 				end
