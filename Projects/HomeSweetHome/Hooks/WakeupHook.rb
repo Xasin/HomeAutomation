@@ -2,6 +2,8 @@
 require_relative '../weather.rb'
 
 module Hooks
+	$wakeupTimes = [7.hours, 6.75.hours, 6.75.hours, 8.25.hours, 8.25.hours, 9.5.hours, 9.5.hours];
+
 	class TimedEvent
 		def initialize(&block)
 			@callback = block;
@@ -98,7 +100,7 @@ module Hooks
 					sleep 0.5;
 					$room.lights = false;
 					sleep 0.5;
-					
+
 					sleepLeft = @alarmEvent.set? - Time.now()
 					if(sleepLeft >= 2.hours) then
 						sleepLeft = "#{(sleepLeft / 1.hours).round(0)} hours"
@@ -140,6 +142,7 @@ module Hooks
 				if not @alarmEvent.set? then
 					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
 				else
+					$mqtt.publish_to "Room/default/Alarm/Unix", nil, retain: true;
 					@alarmEvent.set(nil);
 					@wakeupNotify.notify "Alarm unset."
 				end
@@ -162,6 +165,7 @@ module Hooks
 				time: @alarmTime.to_i
 
         	@alarmEvent.set(@alarmTime);
+			$mqtt.publish_to "Room/default/Alarm/Unix", @alarmTime.to_i, retain: true;
 		end
 		module_function :set_alarm
 

@@ -106,15 +106,6 @@ module Hooks
 			Interpolate::mix_looped(@daylightProfile, dayProfile, offset: i.days, upperBound: 7.days, spacing: 0.5.hours);
 		end
 
-		$wakeupTimes = [7.hours, 6.75.hours, 6.75.hours, 8.25.hours, 8.25.hours, 9.5.hours, 9.5.hours];
-		wakeupProfile = {
-			-1.minutes => Color.K(1800, 0.1),
-			15.minutes => Color.K(4000, 1),
-		};
-		7.times do |i|
-			Interpolate::mix_looped(@daylightProfile, wakeupProfile, offset: i.days + $wakeupTimes[i], upperBound: 7.days, spacing: 0.5.hours);
-		end
-
 		workoutTimes = [18.hours, 13.hours, 17.3.hours, 18.hours, 18.hours, 18.hours, 18.hours];
 		workoutProfile = {
 			0 				=> Color.K(6000, 1),
@@ -136,6 +127,26 @@ module Hooks
 		end
 
 		@daylightInterpolator = Interpolate::Points.new(@daylightProfile);
+
+		wakeupProfile = {
+			-1.minutes => Color.K(1800, 0.1),
+			15.minutes => Color.K(4000, 1),
+		};
+
+		$mqtt.track "Room/default/Alarm/Unix" do |data|
+			begin
+				time = Time.at(data.to_i);
+				offset = ((time.wday-1)%7).days + t.hour.hours + t.min.minutes + t.sec;
+
+				daylightProfile_clone = @daylightProfile.clone;
+				Interpolate::mix_looped(daylightProfile_clone, wakeupProfile, offset: offset, upperBound: 7.days, spacing: 0.5.hours)
+
+				@daylightInterpolator = Interpolate::Points.new(daylightProfile_clone);
+			rescue
+				@daylightInterpolator = Interpolate::Points.new(@daylightProfile)
+			end
+		end
+
 		$cSpeak.daylight_getter do
 			t = Time.now();
 			currentTime = ((t.wday-1)%7).days + t.hour.hours + t.min.minutes + t.sec
