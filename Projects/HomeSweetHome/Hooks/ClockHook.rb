@@ -7,9 +7,6 @@ class TWIClock
 
 		@lastWritten = 0;
 
-		@currentDisplay = 0;
-		@active = true;
-
 		@writeRetries = 0;
 	end
 
@@ -36,26 +33,22 @@ class TWIClock
 
 	def show(value)
 		if(value.is_a? Time) then
-			if(value.to_i < 99*60)
-				value = value.min.to_i * 100 + value.sec.to_i
-			else
-				value = (value.hour.to_i * 100 + value.min.to_i)
-			end
+			value = (value.hour * 100 + value.min)
 		end
 
 		raise ArgumentError, "Unsupported data format!" unless value.is_a? Numeric
-		@currentDisplay = value;
-		_raw_write(value) if @active;
+		_raw_write(value);
 	end
 
-	def active=(value)
-		if(value)
-			_raw_write(@currentDisplay);
-			@active = true;
-		else
-			_raw_write(-1);
-			@active = false;
+	def self.calculate_timer(value)
+		value = value.to_i.abs;
+
+		if(value > 5999)
+			value /= 60;
 		end
+		value = [value, 5999].min;
+
+		return ((value/60).round*100 + value%60);
 	end
 end
 
@@ -90,10 +83,10 @@ class Clock
 
 	def _clock_thread
 		loop do
-			sleep 2;
+			sleep 1;
 			if @currentOverride
 				if(@countdown and @currentOverride.is_a? Time)
-					show(Time.new(@currentOverride - Time.now()));
+					show(Clock.calculate_timer(Time.new(@currentOverride - Time.now())));
 				else
 					show(@currentOverride);
 				end
@@ -107,6 +100,8 @@ class Clock
 
 	def _parse_override(data)
 		@currentOverride = nil;
+		@countdown = false;
+
 		begin
 			data = JSON.parse(data);
 			["temperature", "percentage"].each do |k|
@@ -116,7 +111,12 @@ class Clock
 			end
 
 			if(d = data["time"])
-				@currentOverride = Time.new(d.to_i);
+				@currentOverride = Time.at(d.to_i);
+			end
+
+			if(d = (data["alarm"] or data["timer"]))
+				@currentOverride = Time.at(d.to_i);
+				@countdown = true;
 			end
 		rescue
 		end
