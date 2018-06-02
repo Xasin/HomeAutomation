@@ -16,18 +16,18 @@ namespace Motor {
 		else
 			PORTB &= ~(1<< MOTOR_DIR);
 
-		if(pwr < 0.02)
+		if(pwr < P_FACT * 4)
 			pwr = 0;
-		else if(pwr < 0.13)
-			pwr = 0.13;
+		else if(pwr < 0.15)
+			pwr = 0.15;
 		else if(pwr > 1)
 			pwr = 1;
 
-		OCR1A = pwr*8000;
+		OCR1A = pwr*4000;
 	}
 
 	void updateEncoder() {
-		if((PIND>>MOTOR_C1 ^ PIND>>MOTOR_C2) & 1)
+		if((PINC>>MOTOR_C1 ^ PINC>>MOTOR_C2) & 1)
 			motorPosition++;
 		else
 			motorPosition--;
@@ -50,12 +50,16 @@ namespace Motor {
 			if(fabs(mDiff) < 10)
 				break;
 		}
+
+    _delay_ms(30);
+	 motorTarget = motorPosition;
 	}
 
 	void home() {
 		uint8_t conseq_stops = 0;
+
 		while(conseq_stops < 10) {
-			motorTarget = motorPosition - 0.5/P_FACT;
+			motorTarget = motorPosition - 0.3/P_FACT;
 			if(fabs(motorSpeed) < 1)
 				conseq_stops++;
 			else
@@ -64,24 +68,22 @@ namespace Motor {
 			_delay_ms(10);
 		}
 
-		motorPosition 	= 0;
+		motorPosition 	= - HOME_STEP_CORRECT;
 		motorTarget   	= 0;
 		lastMotor		= 0;
 	}
 
 	void init() {
-		PORTD |= (1<< MOTOR_C1  | 1<< MOTOR_C2);
-		DDRB  |= (1<< MOTOR_PWM | 1<< MOTOR_DIR);
+		PORTC  |= (1<< MOTOR_C1  | 1<< MOTOR_C2);
+		DDRB   |= (1<< MOTOR_PWM | 1<< MOTOR_DIR);
 
-		EICRA |= (1<< ISC00);
-		EIMSK |= (1<< INT0);
+		PCMSK1 |= (1<< MOTOR_C1);
+		PCICR  |= (1<< PCIE1);
 
 		TCCR1A = (1<< COM1A1 | 1<< WGM11);
 		TCCR1B = (1<< WGM13  | 1<< CS10);
-		ICR1   = 8000;
+		ICR1   = 4000;
 
 		TIMSK1|= (1<< TOIE1);
-
-		home();
 	}
 }

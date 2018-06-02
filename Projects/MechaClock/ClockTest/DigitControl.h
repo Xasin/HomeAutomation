@@ -2,7 +2,7 @@
 #include "MotorControl.h"
 
 #define NUM_LETTERS 10
-#define NUM_DIGITS  3
+#define NUM_DIGITS  4
 
 #define STEPS_PER_LETTER STEPS_PER_REV/NUM_LETTERS
 
