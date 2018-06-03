@@ -30,14 +30,11 @@ module Hooks
 			when :working
 				if(newStatus == :not_working)
 					@totalWorkTime = (Time.now() - @startedWork) - @totalBreakTime
-					@startedWork 	= nil;
-
 					@totalWorkTime = (@totalWorkTime/15.minutes).ceil * 15.minutes
 
 					@workStatus = :not_working
 
-					$xasin.notify
-						"Alright! You started at #{@startedWork.hour}:#{@startedWork.min}, had #{(@totalBreakTime/1.minutes).round} minutes of break, sooo ...
+					$xasin.notify "Alright! You started at #{@startedWork.hour}:#{@startedWork.min}, had #{(@totalBreakTime/1.minutes).round} minutes of break, sooo ...
 That's *#{(@totalWorkTime/1.hours).round}:#{(@totalWorkTime/1.minutes).round % 60}* of work done!"
 				elsif([:break, :lunch].include? newStatus)
 					@startedBreak = Time.now();
