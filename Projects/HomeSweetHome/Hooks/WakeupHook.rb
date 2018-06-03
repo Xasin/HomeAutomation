@@ -46,6 +46,9 @@ module Hooks
 		end
 
 		def self.initial_wakeup
+			@alarmEvent.set(nil);
+			$mqtt.publish_to "Room/default/Alarm/Unix", Time.now.to_i, retain: true;
+
 			@weatherEvent.set(Time.now + 5.minutes)
 			@switchRecommendEvent.set(Time.now + 1.minutes);
 
@@ -102,13 +105,16 @@ module Hooks
 					sleep 0.5;
 
 					sleepLeft = @alarmEvent.set? - Time.now()
-					if(sleepLeft >= 2.hours) then
+					if(sleepLeft >= 2.hours)
 						sleepLeft = "#{(sleepLeft / 1.hours).round(0)} hours"
+					elsif(sleepLeft <= 10.minutes)
+						$room.command "gm"
+						sleepLeft = nil;
 					else
 						sleepLeft = "#{(sleepLeft / 1.minutes).round(-1)} minutes"
 					end
 
-					@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed."
+					@wakeupTTS.notify "It's ok. You still have #{sleepLeft} left. Go back to bed." if sleepLeft;
 
 					@sleepLastRecommended = Time.now();
 				end
@@ -129,9 +135,10 @@ module Hooks
 
 		$room.on_command do |data|
 			@wakeupNotify = @wakeupTTS;
-			check_sleep;
 
 			case data
+			when "e"
+				check_sleep
 			when "gm"
 				initial_wakeup
 			when "whtr"
