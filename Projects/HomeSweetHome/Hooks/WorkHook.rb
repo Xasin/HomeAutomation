@@ -32,7 +32,7 @@ module Hooks
 					@totalWorkTime = (Time.now() - @startedWork) - @totalBreakTime
 					@startedWork 	= nil;
 
-					@totalWorkTime /= 15.minutes.ceil * 15.minutes
+					@totalWorkTime = (@totalWorkTime/15.minutes).ceil * 15.minutes
 
 					@workStatus = :not_working
 
