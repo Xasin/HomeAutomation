@@ -6,9 +6,6 @@ module Hooks
 		WORK_POSITION 	= [52.388586, 9.712669]
 		LUNCH_POSITION = [52.386311, 9.713906]
 
-		@xasinPosition = [0, 0];
-		@xasinAccuracy = 0;
-
 		@workStatus  = :not_working
 		@startedWork 		= Time.at(0);
 		@startedBreak 		= Time.at(0);
@@ -16,7 +13,7 @@ module Hooks
 		@totalBreakTime 	= 0;
 		@totalWorkTime 	= 0;
 
-		def self.set_work_status(newStatus)
+		def self.set_work_status(newStatus, context: nil)
 			case @workStatus
 			when :not_working
 				if(newStatus == :working)
@@ -30,25 +27,31 @@ module Hooks
 			when :working
 				if(newStatus == :not_working)
 					@totalWorkTime = (Time.now() - @startedWork) - @totalBreakTime
-					@totalWorkTime = (@totalWorkTime/15.minutes).ceil * 15.minutes
+					@totalWorkTime = (@totalWorkTime/10.minutes).ceil * 10.minutes
 
 					@workStatus = :not_working
 
-					$xasin.notify "Alright! You started at #{@startedWork.hour}:#{@startedWork.min}, had #{(@totalBreakTime/1.minutes).round} minutes of break, sooo ...
+					@totalBreakTime = (@totalBreakTime/5.minutes).round * 5.minutes;
+					breakString = "";
+					if(@totalBreakTime > 0) then
+						breakString = ", had #{@totalBreakTime} minutes of break"
+					end
+
+					$xasin.notify "Alright! You started at #{@startedWork.hour}:#{@startedWork.min}#{breakString}, sooo ...
 That's *#{(@totalWorkTime/1.hours).round}:#{(@totalWorkTime/1.minutes).round % 60}* of work done!"
 				elsif([:break, :lunch].include? newStatus)
 					@startedBreak = Time.now();
 
 					@workStatus = newStatus
 
-					$xasin.notify "Ok, have a nice #{(newStatus == :lunch) ? "lunch" : "break"}!";
+					$xasin.notify "#{context == :autom ? "Have" : "Ok, have"} a nice #{newStatus}!";
 				end
 			when :break, :lunch
 				if(newStatus == :working)
 					@totalBreakTime += Time.now() - @startedBreak;
 					@workStatus = :working;
 
-					$xasin.notify "Back to work indeed!"
+					$xasin.notify "Back to work#{context == :autom ? "" : " indeed"}!"
 				elsif(newStatus == :not_working)
 					@totalBreakTime += Time.now() - @startedBreak;
 					@workStatus = :working;
@@ -66,7 +69,7 @@ That's *#{(@totalWorkTime/1.hours).round}:#{(@totalWorkTime/1.minutes).round % 6
 				set_work_status(:working);
 			when /(finished|done with) work/
 				set_work_status(:not_working)
-			when /(lunch|break) time/
+			when /(lunch|break) time/, /time for (?:a )?(lunch|break)/
 				set_work_status($1.to_sym)
 			end
 		end
@@ -80,10 +83,16 @@ That's *#{(@totalWorkTime/1.hours).round}:#{(@totalWorkTime/1.minutes).round % 6
 
 				lunchDistance = Haversine.distance(LUNCH_POSITION, @xasinPosition).to_m - @xasinAccuracy;
 
-				if(@workStatus == :working and lunchDistance < 50)
-					set_work_status(:lunch);
-				elsif(@workStatus == :lunch and lunchDistance > 80)
-					set_work_status(:working);
+				nextLunchState = lunchDistance < (@xasinAtLunch ? 80 : 50);
+
+				if(nextLunchState != @xasinAtLunch)
+					@xasinAtLunch = nextLunchState;
+
+					if(@workStatus == :working and @xasinAtLunch)
+						set_work_status(:lunch, context: :autom);
+					elsif(@workStatus == :lunch and not @xasinAtLunch)
+						set_work_status(:working, context: :autom);
+					end
 				end
 			rescue
 			end
