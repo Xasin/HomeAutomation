@@ -65,9 +65,9 @@ That's *#{(@totalWorkTime/1.hours).round}:#{(@totalWorkTime/1.minutes).round % 6
 			data = data[:text].downcase
 
 			case data
-			when /(off|back) to work/
+			when /(off|back) to work/, /time for work/
 				set_work_status(:working);
-			when /(finished|done with) work/
+			when /(finished (with)?|done with) work/
 				set_work_status(:not_working)
 			when /(lunch|break) time/, /time for (?:a )?(lunch|break)/
 				set_work_status($1.to_sym)
