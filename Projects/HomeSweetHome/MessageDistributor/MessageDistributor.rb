@@ -33,7 +33,7 @@ module Messaging
 					end
 
 					bestEndpoint.forward_message(toProcessMessage);
-				end
+				end.abort_on_exception = true;
 			end
 		end
 
