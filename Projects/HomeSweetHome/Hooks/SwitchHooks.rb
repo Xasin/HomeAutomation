@@ -72,9 +72,11 @@ module Hooks
 			begin
 				data = JSON.parse(data, symbolize_names: true);
 
-				if(data[:GID].downcase =~ /switch/) then
+				if(data[:gid].downcase =~ /switch/) then
 					$xasin.switch = data[:key];
 				end
+
+			rescue
 			end
 		end
 	end
