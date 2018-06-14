@@ -93,7 +93,8 @@ module Hooks
 			@wakeupNotify.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.",
 					color: Switching::SystemColors[lowestSwitch[0]],
 					gid: "SwitchHelp",
-					percentage: lowestSwitch[1]
+					percentage: lowestSwitch[1],
+					inline_keyboard: [lowestSwitch[0]]
 		end
 
 		@sleepLastRecommended = Time.new(0);

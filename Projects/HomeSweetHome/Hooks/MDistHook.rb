@@ -5,6 +5,10 @@ module Messaging
 	@telegramGIDTable = Hash.new();
 
 	@telegramMEndpoint = Messaging::Endpoint.new() do |data|
+		data[:GID] = data[:gid];
+		$mqtt.publish_to "Telegram/Xasin/Send", data.to_json;
+
+		break;
 		if(data[:single] and data[:gid] and @telegramGIDTable[data[:gid]]) then
 			$telegram.delete_message(@telegramGIDTable[data[:gid]]);
 		end

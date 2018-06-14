@@ -67,5 +67,15 @@ module Hooks
 				$xasin.switch = $1.capitalize
 			end
 		end
+
+		$mqtt.subscribe_to "Telegram/Xasin/KeyboardPress" do |data|
+			begin
+				data = JSON.parse(data, symbolize_names: true);
+
+				if(data[:GID].downcase =~ /switch/) then
+					$xasin.switch = data[:key];
+				end
+			end
+		end
 	end
 end
