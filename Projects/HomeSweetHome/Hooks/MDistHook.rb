@@ -5,6 +5,7 @@ module Messaging
 	@telegramGIDTable = Hash.new();
 
 	@telegramMEndpoint = Messaging::Endpoint.new() do |data|
+		puts "Trying to send: #{data}"
 		$mqtt.publish_to "Telegram/Xasin/Send", data.to_json;
 
 		break;
