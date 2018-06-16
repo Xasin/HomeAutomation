@@ -104,6 +104,9 @@ module Hooks
 			mText = message[:text].downcase;
 			if(mText =~ /(?:switch|switched)/ and mText =~ /(xasin|neira|mesh)/) then
 				$xasin.switch = $1.capitalize
+
+			elsif /(recommend|suggest) .*switch/ =~ mText then
+				switch_recommend
 			end
 		end
 
