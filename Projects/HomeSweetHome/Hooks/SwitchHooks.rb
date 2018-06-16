@@ -28,6 +28,8 @@ module Hooks
 			}
 			outData[:inline_keyboard] = nil;
 			outData[:inline_keyboard] = {"Do it!" => "/switch #{lowestSwitch[1]}"} unless alreadyIn;
+
+			return outData;
 		end
 
 		def self.update_switch_msg
