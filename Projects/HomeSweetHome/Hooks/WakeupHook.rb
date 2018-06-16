@@ -41,10 +41,6 @@ module Hooks
 
 		@wakeupNotify  = @wakeupTTS;
 
-		$mqtt.track "Personal/Xasin/Switching/Data" do |newData|
-			@switchPercentTrack = JSON.parse(newData)["percentage"];
-		end
-
 		def self.initial_wakeup
 			@alarmEvent.set(nil);
 			$mqtt.publish_to "Room/default/Alarm/Unix", Time.now.to_i, retain: true;
@@ -84,17 +80,6 @@ module Hooks
 					@wakeupNotify.notify "Weather forecast currently unavailable."
 				end
 			end
-		end
-
-		def self.switch_recommend
-			@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
-			lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
-
-			@wakeupNotify.notify "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to switch in.",
-					color: Switching::SystemColors[lowestSwitch[0]],
-					gid: "SwitchHelp",
-					percentage: lowestSwitch[1],
-					inline_keyboard: [lowestSwitch[0]]
 		end
 
 		@sleepLastRecommended = Time.new(0);
