@@ -142,14 +142,6 @@ module Hooks
 			end
 		end
 
-		$telegram.on_message do |data|
-			@wakeupNotify = @wakeupUser;
-
-			if /(recommend|suggest) .*switch/ =~ data[:text].downcase then
-				switch_recommend
-			end
-		end
-
 		def set_alarm(time = 7.hours)
 			@alarmTime =  Time.today(time);
          @alarmTime += 24.hours if @alarmTime <= Time.now();
