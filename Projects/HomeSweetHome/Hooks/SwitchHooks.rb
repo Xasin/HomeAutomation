@@ -12,6 +12,35 @@ module Hooks
 		@switchTTS = ColorSpeak::Client.new($mqtt, "Switching");
 		@switchMSG = Messaging::UserClient.new($mqtt, "Xasin", "Switching");
 
+		@switchPercentTrack = {"Xasin" => 0, "Neira" => 0, "Mesh" => 0};
+
+		def self.get_switch_msg
+			@switchPercentTrack.delete_if {|key| not Hooks::Switching::SystemColors.include? key }
+			lowestSwitch = @switchPercentTrack.min_by {|key,value| value};
+
+			alreadyIn = lowestSwitch[0] == $xasin.switch
+
+			outData = {
+				text:  "I recommend #{lowestSwitch[0]} at #{lowestSwitch[1]} percent to #{alreadyIn ? "stay switched" : "switch"} in.",
+				color: Switching::SystemColors[lowestSwitch[0]],
+				gid:   "SwitchRecommend",
+				percentage: lowestSwitch[1]
+			}
+			outData[:inline_keyboard] = nil;
+			outData[:inline_keyboard] = {"Do it!" => "/switch #{lowestSwitch[1]}"} unless alreadyIn;
+		end
+
+		def self.update_switch_msg
+			data = get_switch_msg();
+			data[:override] = true;
+			$mqtt.publish_to "Telegram/Xasin/Edit", data.to_json
+		end
+
+		def self.switch_recommend
+			data = get_switch_msg();
+			@switchMSG.notify data[:text], **data;
+		end
+
 		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
@@ -29,36 +58,44 @@ module Hooks
 			elsif(formerMember != "none") then
 				@switchMSG.speak "Good night, #{formerMember}.", @SystemColors[formerMember];
 			end
+
+			update_switch_msg();
+		end
+
+		$mqtt.track "Personal/Xasin/Switching/Data" do |newData|
+			@switchPercentTrack = JSON.parse(newData)["percentage"];
+			update_switch_msg();
 		end
 
 		$room.on_command do |data|
-		if(data == "gm") then
-			Thread.new do
-				sleepTime = Time.now() + 15.minutes;
+			case data
+			when "gm"
+				Thread.new do
+					sleepTime = Time.now() + 15.minutes;
 
-				while true do
-					sleep 5;
+					while true do
+						sleep 5;
 
-					if($xasin.switch != "none") then
-						break;
-					end
+						if($xasin.switch != "none") then
+							break;
+						end
 
-					if(Time.now >= sleepTime) then
-						@switchTTS.speak "Please remember", @SystemColors["Xasin"]
-						@switchTTS.speak "to log", @SystemColors["Neira"]
-						@switchTTS.speak "your switch", @SystemColors["Mesh"]
-						break;
+						if(Time.now >= sleepTime) then
+							@switchTTS.speak "Please remember", @SystemColors["Xasin"]
+							@switchTTS.speak "to log", @SystemColors["Neira"]
+							@switchTTS.speak "your switch", @SystemColors["Mesh"]
+							break;
+						end
 					end
 				end
-			end
-		end
 
-		if(data =~ /sw([nmxs])/) then
-			$xasin.switch = {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1]
-		end
-		if(data == "gn") then
-			$xasin.switch = "none"
-		end
+			when /sw([nmxs])/
+				$xasin.switch = {"m" => "Mesh", "x" => "Xasin", "n" => "Neira", "s" => "none"}[$1]
+			when "sr"
+				switch_recommend
+			when "gn"
+				$xasin.switch = "none"
+			end
 		end
 
 		$telegram.on_message do |message|
@@ -68,14 +105,13 @@ module Hooks
 			end
 		end
 
-		$mqtt.subscribe_to "Telegram/Xasin/KeyboardPress" do |data|
+		$mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 			begin
-				data = JSON.parse(data, symbolize_names: true);
+				text = JSON.parse(data)["text"]
 
-				if(data[:gid].downcase =~ /switch/) then
-					$xasin.switch = data[:key];
+				if(text =~ /\/switch (Xasin|Neira|Mesh)/) then
+					$xasin.switch = $1;
 				end
-
 			rescue
 			end
 		end
