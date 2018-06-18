@@ -27,7 +27,7 @@ module Hooks
 				percentage: lowestSwitch[1]
 			}
 			outData[:inline_keyboard] = nil;
-			outData[:inline_keyboard] = {"Do it!" => "/switch #{lowestSwitch[1]}"} unless alreadyIn;
+			outData[:inline_keyboard] = {"Do it!" => "/switch #{lowestSwitch[0]}"} unless alreadyIn;
 
 			return outData;
 		end
