@@ -34,11 +34,11 @@ module Hooks
 
 		def self.update_switch_msg
 			data = get_switch_msg();
-			data[:override] = true;
 			$mqtt.publish_to "Telegram/Xasin/Edit", data.to_json
 		end
 
 		def self.switch_recommend
+			$mqtt.publish_to "Telegram/Xasin/Edit", {gid: "SwitchRecommend", inline_keyboard: nil}
 			data = get_switch_msg();
 			@switchMSG.notify data[:text], **data;
 		end

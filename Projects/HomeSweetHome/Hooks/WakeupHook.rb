@@ -129,8 +129,6 @@ module Hooks
 				initial_wakeup
 			when "whtr"
 				weather_report
-			when "sr"
-				switch_recommend
 			when "clk"
 				if not @alarmEvent.set? then
 					set_alarm($wakeupTimes[(Time.now() - 6.hours).wday])
