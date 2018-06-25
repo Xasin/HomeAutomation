@@ -27,5 +27,15 @@ module Hooks
 				end
 			end
 		end
+
+		$mqtt.subscribe_to "Telegram/Lukas/Received" do |data|
+			begin
+				data = JSON.parse(data);
+			rescue
+				next;
+			end
+
+			$mqtt.publish_to "Telegram/Lukas/Send", "Tut mir leid, noch kann ich nichts!"
+		end
 	end
 end
