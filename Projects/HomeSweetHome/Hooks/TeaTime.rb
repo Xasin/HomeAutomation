@@ -3,11 +3,22 @@ require 'json'
 
 module Hooks
 	module TeaTimer
-
+		TEA_COLOR = Color.RGB(255, 200, 100);
 		@teaTime = nil;
 
+TEA_READY_WORDS = [
+	"Thy hot beverage is almost brewed.",
+	"Enjoy a splendid chowtime, dear friend!",
+	"Your tea can now be served, master. Enjoy!"
+]
+TEA_BREWING_WORDS = [
+	"Your tea will be ready in",
+	"Tea timer has been set to",
+	"I do hope your scones are ready for tea in",
+]
+
 		def self._stop_teaTimer()
-			$xasin.notify("Your tea is ready!", Color.RGB(255, 200, 100), {
+			$xasin.notify(TEA_READY_WORDS.sample, TEA_COLOR, {
 				timer: @teaTime.to_i
 			})
 
@@ -32,16 +43,14 @@ module Hooks
 
 		def self.start_timer(duration = 5.minutes)
 			@teaTime = Time.now() + duration;
-			$xasin.notify("Tea timer has been set to #{(duration/1.minutes).round(1)} minutes!", Color.RGB(255, 200, 100), {
+			$xasin.notify("#{TEA_BREWING_WORDS.sample} #{(duration/1.minutes).round(0)} minutes!", TEA_COLOR, {
 				timer: @teaTime.to_i
 			});
 
 			@teaThread.run();
 		end
 		def self.abort_timer()
-			$xasin.notify("Tea timer stopped.", Color.RGB(255, 200, 100), {
-				timer: @teaTime.to_i
-			});
+			$xasin.notify("Tea timer stopped.", TEA_COLOR);
 
 			@teaTime = nil;
 			_update_teaTimerInfo();
@@ -49,7 +58,7 @@ module Hooks
 
 		@teaThread = Thread.new() do
 			loop do
-				sleep 5;
+				sleep 10;
 				Thread.stop() until @teaTime
 
 				if((@teaTime - Time.now()).to_i <= 0)
