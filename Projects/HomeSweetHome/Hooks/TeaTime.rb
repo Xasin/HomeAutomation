@@ -80,7 +80,7 @@ TEA_KINDS = {
 		$telegram.on_message do |data|
 			text = data[:text].downcase
 
-			if(text =~ /(?:making|make) (?:.*)(\w+) tea/)
+			if(text =~ /(?:making|make)(?:.*) (\w+) tea/)
 				if(t = TEA_KINDS[$1])
 					start_timer(t);
 				end
