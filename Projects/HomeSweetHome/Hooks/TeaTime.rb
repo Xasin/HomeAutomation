@@ -32,12 +32,17 @@ module Hooks
 
 		def self.start_timer(duration = 5.minutes)
 			@teaTime = Time.now() + duration;
-			$xasin.notify("Tea timer has been set to #{(duration/1.minutes).round(1)} minutes!");
+			$xasin.notify("Tea timer has been set to #{(duration/1.minutes).round(1)} minutes!", Color.RGB(255, 200, 100), {
+				timer: @teaTime.to_i
+			});
 
 			@teaThread.run();
 		end
 		def self.abort_timer()
-			$xasin.notify("Tea timer stopped.");
+			$xasin.notify("Tea timer stopped.", Color.RGB(255, 200, 100), {
+				timer: @teaTime.to_i
+			});
+
 			@teaTime = nil;
 			_update_teaTimerInfo();
 		end
