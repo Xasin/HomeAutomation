@@ -32,7 +32,7 @@ TEA_BREWING_WORDS = [
 			end
 
 			remainingTime = (@teaTime - Time.now()).to_i;
-			remainingTimeString = "#{(remainingTime/1.minutes).floor}:#{(remainingTime).floor % 60}"
+			remainingTimeString = "#{(remainingTime/1.minutes).floor}:#{(remainingTime).round % 60}"
 
 			$mqtt.publish_to "Telegram/Xasin/Send", {
 				gid: 			"TeaTimerInfo",
@@ -61,7 +61,7 @@ TEA_BREWING_WORDS = [
 				sleep 10;
 				Thread.stop() until @teaTime
 
-				if((@teaTime - Time.now()).to_i <= 0)
+				if((@teaTime - Time.now()).to_i <= 11)
 					_stop_teaTimer();
 				end
 
