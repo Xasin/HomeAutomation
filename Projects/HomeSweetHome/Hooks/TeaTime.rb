@@ -17,6 +17,14 @@ TEA_BREWING_WORDS = [
 	"I do hope your scones are ready for tea in",
 ]
 
+TEA_KINDS = {
+	"ice" 		 => 4.5.minutes,
+	"peppermint" => 7.minutes,
+	"black"		 => 6.minutes,
+	"roiboos"	 => 5.minutes,
+	"salbei"		 => 4.minutes,
+}
+
 		def self._stop_teaTimer()
 			$xasin.notify(TEA_READY_WORDS.sample, TEA_COLOR, {
 				timer: @teaTime.to_i
@@ -66,6 +74,16 @@ TEA_BREWING_WORDS = [
 				end
 
 				_update_teaTimerInfo();
+			end
+		end
+
+		$telegram.on_message do |data|
+			text = data[:text].downcase
+
+			if(text =~ /(?:making|make) (?:.*)(\w+) tea/)
+				if(t = TEA_KINDS[$1])
+					start_timer(t);
+				end
 			end
 		end
 
