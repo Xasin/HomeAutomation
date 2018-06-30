@@ -71,7 +71,7 @@ module Hooks
 			case cmd
 			when /^\/tea stop/
 				abort_timer();
-			when /^\/tea (\d+(?:\.\d+))/
+			when /^\/tea (\d+(?:\.\d+)?)/
 				start_timer($1.to_i.minutes);
 			end
 		end
