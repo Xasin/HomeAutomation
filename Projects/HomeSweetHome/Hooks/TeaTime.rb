@@ -27,7 +27,7 @@ module Hooks
 				gid: 			"TeaTimerInfo",
 				overwrite: 	true,
 				text:			"Tea will be ready in #{remainingTimeString}"
-			}
+			}.to_json
 		end
 
 		def self.start_timer(duration = 5.minutes)
