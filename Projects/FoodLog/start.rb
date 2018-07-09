@@ -14,19 +14,21 @@ def send_msg(msg)
 	send_raw({text: msg});
 end
 
-$mqtt.subscribe_to "Telegram/Xasin/Commands" do |data|
+$mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 	begin
 		data = JSON.parse(data);
 	rescue
 		next;
 	end
 
-	cmd = data[:text];
+	cmd = data["text"];
 
 	case cmd
 	when /^\/addfood (\w+) (\w+)?/
 		begin
-			$database.add_new_food($1, $2 | "Food");
+			category = "Food"
+			category = $2 if $2;
+			$database.add_new_food($1, category);
 		rescue
 			send_msg "That food already exists!"
 		else
@@ -42,14 +44,10 @@ $mqtt.subscribe_to "Telegram/Xasin/Commands" do |data|
 		unknownFood = catch :unknown_food do
 			foodList.split(" ").each do |food|
 				next unless food =~ /(\w+)(?:\*(\d+(?:\.\d+)?))?/
-
-				begin
-					foodIDList[$database.get_food_id($1)] = $2 or 1;
-				rescue
-					throw :unknown_food, $1
-				end
+				foodID = $database.get_food_id($1);	
+				throw :unknown_food, $1 unless foodID
+				foodIDList[foodID] = $2 or 1;
 			end
-
 			nil;
 		end
 
@@ -66,3 +64,5 @@ $mqtt.subscribe_to "Telegram/Xasin/Commands" do |data|
 		end
 	end
 end
+
+$mqtt.lockAndListen();
