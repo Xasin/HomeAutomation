@@ -24,7 +24,7 @@ $mqtt.subscribe_to "Telegram/Xasin/Commands" do |data|
 	cmd = data[:text];
 
 	case cmd
-	when /^\/addfood (\w+) (\w+)?/
+	when /^\/addfood (\w+)(?: (\w+))?/
 		begin
 			$database.add_new_food($1, $2 | "Food");
 		rescue
