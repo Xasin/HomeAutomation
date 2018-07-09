@@ -42,7 +42,8 @@ class FoodDB
 		output = Hash.new();
 
 		@foodDB.execute("SELECT * FROM Consumables") do |row|
-			output[row['ID']] = row.delete 'ID'
+			id = row.delete 'ID';
+			output[id] = row;
 		end
 
 		return output;
