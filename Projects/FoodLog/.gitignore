@@ -1,3 +1,4 @@
 mqttLogin.rb
 *.db
 Gemfile.lock
+*.csv

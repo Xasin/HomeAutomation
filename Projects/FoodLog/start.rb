@@ -7,6 +7,11 @@ require_relative 'DBManager.rb'
 
 $database = FoodDB.new();
 
+def log_event(data)
+	timeString = Time.now().strftime("%m.%d %H:%M")
+	`echo "#{timeString};#{data}" >> eventLog.csv`
+end
+
 def send_raw(data)
 	$mqtt.publish_to "Telegram/Xasin/Send", data.to_json
 end
@@ -24,7 +29,7 @@ $mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 	cmd = data["text"];
 
 	case cmd
-	when /^\/addfood (\w+) (\w+)?/
+	when /^\/addfood (\w+)(?: (\w+))?/
 		begin
 			category = "Food"
 			category = $2 if $2;
@@ -44,9 +49,14 @@ $mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 		unknownFood = catch :unknown_food do
 			foodList.split(" ").each do |food|
 				next unless food =~ /(\w+)(?:\*(\d+(?:\.\d+)?))?/
+
 				foodID = $database.get_food_id($1);	
 				throw :unknown_food, $1 unless foodID
-				foodIDList[foodID] = $2 or 1;
+				
+				amount = $2.to_i;
+				amount = 1 if amount == 0;
+
+				foodIDList[foodID] = amount;
 			end
 			nil;
 		end
@@ -62,6 +72,10 @@ $mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 			end
 			send_msg "Alright, logged #{foodIDList.length} entries!"
 		end
+
+	when /^\/logevent (.+)/
+		log_event($1);
+		send_msg "Alright, got that. Thanks for telling me!"
 	end
 end
 

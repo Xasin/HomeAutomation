@@ -42,7 +42,8 @@ class FoodDB
 		output = Hash.new();
 
 		@foodDB.execute("SELECT * FROM Consumables") do |row|
-			output[row['ID']] = row.delete 'ID'
+			id = row.delete 'ID';
+			output[id] = row;
 		end
 
 		return output;
@@ -70,6 +71,7 @@ class FoodDB
 	end
 
 	def get_amount_consumed_between(startTime = 0, endTime = Time.now())
-		return @foodDB.execute("SELECT ConsumedID, SUM(Amount) FROM Consumed GROUP BY ConsumedID;")
+		return @foodDB.execute("SELECT ConsumedID, SUM(Amount) FROM Consumed WHERE EatenAt BETWEEN ? AND ? GROUP BY ConsumedID;",
+			startTime.to_i, endTime.to_i)
 	end
 end
