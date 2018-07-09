@@ -44,7 +44,10 @@ $mqtt.subscribe_to "Telegram/Xasin/Commands" do |data|
 				next unless food =~ /(\w+)(?:\*(\d+(?:\.\d+)?))?/
 
 				begin
-					foodIDList[$database.get_food_id($1)] = $2 or 1;
+					amount = $2.to_i;
+					amount = 1 if amount == 0;
+
+					foodIDList[$database.get_food_id($1)] = amount;
 				rescue
 					throw :unknown_food, $1
 				end
