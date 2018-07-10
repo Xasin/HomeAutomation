@@ -5,11 +5,15 @@ require 'json'
 require_relative 'mqttLogin.rb'
 require_relative 'DBManager.rb'
 
-$database = FoodDB.new();
+$database  = FoodDB.new();
+$eventFName = "eventLog.csv";
 
 def log_event(data)
 	timeString = Time.now().strftime("%m.%d %H:%M")
-	`echo "#{timeString};#{data}" >> eventLog.csv`
+
+	File.open($eventFName, "a") do |f|
+		f.puts "#{timeString};#{data}"
+	end
 end
 
 def send_raw(data)
@@ -50,10 +54,10 @@ $mqtt.subscribe_to "Telegram/Xasin/Command" do |data|
 			foodList.split(" ").each do |food|
 				next unless food =~ /(\w+)(?:\*(\d+(?:\.\d+)?))?/
 
-				foodID = $database.get_food_id($1);	
+				foodID = $database.get_food_id($1);
 				throw :unknown_food, $1 unless foodID
-				
-				amount = $2.to_i;
+
+				amount = $2.to_f;
 				amount = 1 if amount == 0;
 
 				foodIDList[foodID] = amount;
