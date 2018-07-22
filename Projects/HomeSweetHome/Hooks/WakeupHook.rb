@@ -2,7 +2,7 @@
 require_relative '../weather.rb'
 
 module Hooks
-	$wakeupTimes = [7.hours, 6.75.hours, 6.75.hours, 8.25.hours, 8.25.hours, 9.5.hours, 9.5.hours];
+	$wakeupTimes = [7.5.hours, 7.5.hours, 7.5.hours, 7.5.hours, 8.25.hours, 9.5.hours, 9.5.hours];
 
 	class TimedEvent
 		def initialize(&block)
