@@ -34,7 +34,7 @@ module Hooks
 					@totalBreakTime = (@totalBreakTime/5.minutes).round * 5.minutes;
 					breakString = "";
 					if(@totalBreakTime > 0) then
-						breakString = ", had #{@totalBreakTime} minutes of break"
+						breakString = ", had #{@totalBreakTime/1.minutes} minutes of break"
 					end
 
 					$xasin.notify "Alright! You started at #{@startedWork.hour}:#{@startedWork.min}#{breakString}, sooo ...
