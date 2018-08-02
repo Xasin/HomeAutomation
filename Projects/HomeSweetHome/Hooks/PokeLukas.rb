@@ -15,14 +15,16 @@ module Hooks
 
 			currentTime = Time.now().min.minutes + Time.now().hour.hours
 			next unless currentTime.between?(11.5.hours, 14.hours)
-			
+
 			position = [data["lat"], data["lon"]];
 			accuracy = data["acc"];
 			lunchDistance = Haversine.distance(Xasin::Locations::Lunch, position).to_m - accuracy;
 
+			next;
+
 			if((lunchDistance < 30) and (Time.now() - @lastLunchPoked) > 5.hours)
 				@lastLunchPoked = Time.now();
-				
+
 				$mqtt.publish_to("Telegram/Lukas/Send", {
 					text: "David ist jetzt in der Mensa! Kommst du auch?",
 					inline_keyboard: {"Ja!" => "/mensa confirm", "Nein" => "/mensa deny"},
@@ -37,11 +39,11 @@ module Hooks
 			rescue
 				next;
 			end
-			
+
 			case data["text"]
 			when /\/mensa (confirm|deny)/
 				$mqtt.publish_to("Telegram/Lukas/Edit", {gid: "MensaCheck", inline_keyboard: nil}.to_json)
-				
+
 				if($1 == "confirm")
 					$mqtt.publish_to "Telegram/Lukas/Send", "Super!"
 					$mqtt.publish_to "Telegram/Xasin/Send", "Lukas kommt auch gleich!"
@@ -50,7 +52,7 @@ module Hooks
 				end
 			end
 		end
-			
+
 		$mqtt.subscribe_to "Telegram/Lukas/Received" do |data|
 			begin
 				data = JSON.parse(data);
