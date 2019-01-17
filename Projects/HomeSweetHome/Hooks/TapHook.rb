@@ -45,7 +45,7 @@ module Hooks
 				data = JSON.parse(data);
 
 				if(c = data["color"])
-					c = Color.from_s(c).rgb();
+					c = Color.from_s(c).set_brightness(100).rgb();
 
 					stdbyColor = [c[2], c[1], c[0]];
 				end
