@@ -46,6 +46,10 @@ module Hooks
 		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
+			$eclipse.publish_to "Personal/Xasin/Switching/Who", newMember;
+			$eclipse.publish_to "Personal/Yyunko/XaHead/Who", newMember;
+			$eclipse.publish_to "Personal/CyanRainNin/XaHead/Who", newMember;
+
 			push_member = newMember;
 			push_member = "_nil" if newMember == "none"
 			begin
