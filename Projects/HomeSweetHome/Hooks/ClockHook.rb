@@ -19,7 +19,7 @@ class TWIClock
 
 			@lastWritten  = value;
 			@writeRetries = 0;
-		rescue Errno::EIO, Errno::ETIMEDOUT
+		rescue
 			@writeRetries += 1;
 
 			if(@writeRetries < 3)
