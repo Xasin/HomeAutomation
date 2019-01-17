@@ -20,6 +20,14 @@ module Hooks
 				end
 			end
 
+			if(@formerBattery < 90 && newBattery >= 90)
+				if((Time.now()-@lastMentioned) > 10*60)
+					@tapMSG.speak "Tap is fully charged!", Color.RGB(10, 250, 50);
+
+					@lastMentioned = Time.now();
+				end
+			end
+
 			@formerBattery = newBattery;
 		end
 
@@ -34,6 +42,8 @@ module Hooks
 
 		$eclipse.subscribe_to "Personal/Xasin/Tap/Morse/Out" do |data|
 			if($xasin.awake_and_home?)
+				$room.command(data);
+			elsif data =~ /^(sw|tt|gn)/
 				$room.command(data);
 			end
 		end
