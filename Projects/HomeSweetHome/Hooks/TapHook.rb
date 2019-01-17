@@ -7,7 +7,7 @@ module Hooks
 		@lastMentioned = Time.at(0);
 
 		$eclipse.subscribe_to "Personal/Xasin/Tap/Battery" do |data|
-			newBattery = data.unpack("c");
+			newBattery = data.unpack("c")[0];
 
 			[25, 10, 5].each do |i|
 				if((@formerBattery > i && newBattery <= i))
