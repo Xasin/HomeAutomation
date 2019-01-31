@@ -84,6 +84,8 @@ module Hooks
 				$mqtt.publish_to "Room/default/Sensors/Brightness", @lightSensor.brightness;
 
 				next unless $xasin.awake_and_home?
+				next unless Time.now().hour.between?(5, 22);
+
 				if case @humidSensor.humidity
 						when 53..58
 							next if @lastNotified + 3.hours >= Time.now();
