@@ -1,4 +1,6 @@
 
+require 'timeout'
+
 module Hooks
 	module Switching
 
@@ -46,14 +48,19 @@ module Hooks
 		$xasin.on_switch do |newMember, formerMember|
 			formerMember ||= "none";
 
-			$eclipse.publish_to "Personal/Xasin/Switching/Who", newMember;
-			$eclipse.publish_to "Personal/Yyunko/XaHead/Who", newMember;
-			$eclipse.publish_to "Personal/CyanRainNin/XaHead/Who", newMember;
-
-			push_member = newMember;
-			push_member = "_nil" if newMember == "none"
 			begin
-			`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{push_member}"}}' https://www.switchcounter.science/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
+				Timeout.timeout(1) {
+					$eclipse.publish_to "Personal/Xasin/Switching/Who", newMember;
+					$eclipse.publish_to "Personal/Yyunko/XaHead/Who", newMember;
+					$eclipse.publish_to "Personal/CyanRainNin/XaHead/Who", newMember;
+
+					push_member = newMember;
+					push_member = "_nil" if newMember == "none"
+					begin
+					`curl -X POST -H "Content-Type: application/json" -d '{"webhook": {"command": "switch", "member_name": "#{push_member}"}}' https://www.switchcounter.science/webhook/be92e614a5831f6cbaa67f125c59853fc43dfee2 > /dev/null 2>&1 &`
+					rescue
+					end
+				}
 			rescue
 			end
 
