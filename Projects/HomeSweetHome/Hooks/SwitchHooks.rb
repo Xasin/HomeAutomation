@@ -49,7 +49,7 @@ module Hooks
 			formerMember ||= "none";
 
 			begin
-				Timeout.timeout(1) {
+				Timeout.timeout(3) {
 					$eclipse.publish_to "Personal/Xasin/Switching/Who", newMember;
 					$eclipse.publish_to "Personal/Yyunko/XaHead/Who", newMember;
 					$eclipse.publish_to "Personal/CyanRainNin/XaHead/Who", newMember;

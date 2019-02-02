@@ -62,7 +62,7 @@ module Hooks
 			rescue
 			end
 
-			$eclipse.publish_to "Personal/Xasin/Tap/StdbyColor", stdbyColor.pack("c3");
+			#$eclipse.publish_to "Personal/Xasin/Tap/StdbyColor", stdbyColor.pack("c3");
 		end
 	end
 end
