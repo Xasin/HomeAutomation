@@ -18,7 +18,7 @@ require 'xasin/telegram/MQTT_Adapter.rb'
 
 require_relative 'mqttSignIn.rb'
 
-$eclipse = MQTT::Eclipse();
+$eclipse = MQTT.Eclipse();
 
 require_relative 'RoomLight/TWILight.rb'
 require_relative 'RoomLight/ColorSpeak.rb'
@@ -75,4 +75,4 @@ Signal.trap("SIGHUP") {
 }
 
 puts ""
-$mqtt.lockAndListen();
+$eclipse.lockAndListen();
