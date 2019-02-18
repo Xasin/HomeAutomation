@@ -1,7 +1,8 @@
 #!/usr/bin/ruby2.4.1
 
 at_exit {
-  exec("git pull; ruby start.rb") if $updateSignalSent
+	sleep 3*69 unless $updateSignalSent
+ 	exec("git pull; ruby start.rb")
 }
 
 `echo #{ $$ } > /tmp/ColorSpeak.pid`
@@ -73,6 +74,12 @@ Signal.trap("SIGHUP") {
   $updateSignalSent = true;
   exit
 }
+$telegram.on_message do |message|
+	if message[:text] =~ /\/restart/ then
+		$updateSignalSent = true;
+		exit
+	end
+end
 
 puts ""
 $mqtt.lockAndListen();
