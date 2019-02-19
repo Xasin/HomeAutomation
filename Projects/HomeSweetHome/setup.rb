@@ -2,7 +2,7 @@
 
 at_exit {
 	sleep 3*69 unless $updateSignalSent
- 	exec("git pull; ruby start.rb")
+ 	exec("git pull; ruby setup.rb")
 }
 
 `echo #{ $$ } > /tmp/ColorSpeak.pid`
@@ -76,6 +76,7 @@ Signal.trap("SIGHUP") {
 }
 $telegram.on_message do |message|
 	if message[:text] =~ /\/restart/ then
+		puts "RESTART ISSUED FROM TELEGRAM!"
 		$updateSignalSent = true;
 		exit
 	end
