@@ -50,7 +50,8 @@ module Hooks
 
 			begin
 				Timeout.timeout(3) {
-					`mosquitto_pub -h iot.eclipse.org -t 'Personal/CyanRainNin/XaHead/Who' -m #{newMember}`
+					`mosquitto_pub -h iot.eclipse.org -t 'Personal/CyanRainNin/XaHead/Who' -m #{newMember} &`
+					`mosquitto_pub -h iot.eclipse.org -t 'Personal/Yyunko/XaHead/Who' -m #{newMember} &`
 					#$eclipse.publish_to "Personal/Xasin/Switching/Who", newMember;
 					#$eclipse.publish_to "Personal/Yyunko/XaHead/Who", newMember;
 					#$eclipse.publish_to "Personal/CyanRainNin/XaHead/Who", newMember;
