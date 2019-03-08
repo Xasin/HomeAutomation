@@ -40,12 +40,23 @@ module Hooks
 			@wasConnected = (data == "OK");
 		end
 
-		$flespi.subscribe_to "Personal/Xasin/Tap/Morse/Out" do |data|
+		$flespi.subscribe_to "Xasin/Tap/Update/6869" do |data|
 			if($xasin.awake_and_home?)
 				$room.command(data);
 			elsif data =~ /^(sw|tt|gn)/
 				$room.command(data);
 			end
+		end
+
+		$xasin.on_switch do |newMember|
+			swNum = {
+				"sleep" => 0,
+				"Xasin" => 1,
+				"Neira" => 2,
+				"Mesh"  => 3,
+			}[newMember];
+
+			$flespi.publish_to "Xasin/Tap/Write/7377", [swNum].pack("c"), retain: true
 		end
 
 		$mqtt.subscribe_to "Room/default/Info/Current" do |data|
@@ -62,7 +73,7 @@ module Hooks
 			rescue
 			end
 
-			$flespi.publish_to "Personal/Xasin/Tap/StdbyColor", stdbyColor.pack("c3");
+			$flespi.publish_to "Xasin/Tap/Write/7363", stdbyColor.pack("c3"), retain: true;
 		end
 	end
 end

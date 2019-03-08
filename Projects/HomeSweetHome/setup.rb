@@ -83,4 +83,4 @@ $telegram.on_message do |message|
 end
 
 puts ""
-$eclipse.lockAndListen();
+$mqtt.lockAndListen();
