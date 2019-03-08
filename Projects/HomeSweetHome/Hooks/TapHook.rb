@@ -32,7 +32,7 @@ module Hooks
 		end
 
 		@wasConnected = true;
-		$eclipse.track "Personal/Xasin/Tap/Connection" do |data|
+		$flespi.track "Personal/Xasin/Tap/Connection" do |data|
 			if(@wasConnected && data != "OK")
 				@tapMSG.speak "It seems Tap has disconnected.", Color.RGB(255, 180, 0);
 			end
@@ -40,7 +40,7 @@ module Hooks
 			@wasConnected = (data == "OK");
 		end
 
-		$eclipse.subscribe_to "Personal/Xasin/Tap/Morse/Out" do |data|
+		$flespi.subscribe_to "Personal/Xasin/Tap/Morse/Out" do |data|
 			if($xasin.awake_and_home?)
 				$room.command(data);
 			elsif data =~ /^(sw|tt|gn)/
@@ -62,7 +62,7 @@ module Hooks
 			rescue
 			end
 
-			#$eclipse.publish_to "Personal/Xasin/Tap/StdbyColor", stdbyColor.pack("c3");
+			$flespi.publish_to "Personal/Xasin/Tap/StdbyColor", stdbyColor.pack("c3");
 		end
 	end
 end
