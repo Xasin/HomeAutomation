@@ -66,7 +66,10 @@ print "Lukas-Poker, "
 require_relative "Hooks/TeaTime.rb"
 print "Tea timer, "
 require_relative "Hooks/TapHook.rb"
-print "Tap integration."
+print "Tap integration, "
+
+require_relative "Hooks/DSKorder.rb"
+print "DSKorder relay."
 
 puts "\nPID of this process: #{Process.pid}"
 
