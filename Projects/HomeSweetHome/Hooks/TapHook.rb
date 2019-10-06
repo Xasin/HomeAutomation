@@ -54,7 +54,7 @@ module Hooks
 				"Xasin" => 1,
 				"Neira" => 2,
 				"Mesh"  => 3,
-			}[newMember];
+			}[newMember] || 0;
 
 			$flespi.publish_to "Xasin/Tap/Write/7377", [swNum].pack("c"), retain: true
 		end
