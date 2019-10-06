@@ -40,6 +40,8 @@ module Hooks
 		end
 
 		def self.switch_recommend
+			puts("Pushing edit!")
+
 			$mqtt.publish_to "Telegram/Xasin/Edit", {gid: "SwitchRecommend", inline_keyboard: nil}
 			data = get_switch_msg();
 			@switchMSG.notify data[:text], **data;
@@ -50,8 +52,8 @@ module Hooks
 
 			begin
 				Timeout.timeout(3) {
-					`mosquitto_pub -h iot.eclipse.org -t 'Personal/CyanRainNin/XaHead/Who' -m #{newMember} &`
-					`mosquitto_pub -h iot.eclipse.org -t 'Personal/Yyunko/XaHead/Who' -m #{newMember} &`
+					`mosquitto_pub -h mqtt.eclipse.org -t 'Personal/CyanRainNin/XaHead/Who' -m #{newMember} &`
+					`mosquitto_pub -h mqtt.eclipse.org -t 'Personal/Yyunko/XaHead/Who' -m #{newMember} &`
 					$flespi.publish_to "Personal/Xasin/Switching/Who", newMember;
 
 					push_member = newMember;
